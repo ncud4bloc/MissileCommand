@@ -6,6 +6,8 @@ var $gameBoard = $('<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" id="gam
 var $canvas = $('<canvas width = "780" height = "510" id = "canvas"></canvas>');
 
 var count = 0;
+var iter = 0;
+var tick = 420;
 var alphaGun;
 var bravoGun;
 var charlieGun;
@@ -14,15 +16,18 @@ var myMouses = [];
 var mouseX;
 var mouseY;
 var firingGun;
-var fireSlope;
 
 var aa;
 var theta;
 var deltaX;
 var deltaY;
+var gunDeltaAr = [];
+var missileDeltaAr = [];
+var eachDelta = [];
 
 var shoot;
 var bullets = [];
+var missiles = [];
 var alphaAmmo = 5;      /* This will be modded later */
 var bravoAmmo = 5;      /* This will be modded later */
 var charlieAmmo = 5;    /* This will be modded later */
@@ -35,6 +40,7 @@ $gameBoard.append($canvas);
 
 var canvas = document.getElementById('canvas');
 var c = canvas.getContext('2d');
+var cErase = canvas.getContext('2d');
    
 /* ---------------  CSS  --------------- */
 
@@ -114,7 +120,7 @@ $gameBoard.css({
 
 /* Create the Ground Graphics  */
 var groundGen = function(){
-    for(var i = 0;i < 3;i++){
+    for(var i = 0;i < 4;i++){
         c.fillStyle = "#14f514";
         c.beginPath();
         c.moveTo(i*260,470);
@@ -125,7 +131,6 @@ var groundGen = function(){
         c.lineTo(i*260+260,530);
         c.lineTo(i*260,530);
         c.closePath();
-        /*c.lineTo(i*260,470);*/
         c.fill();
     }
 };
@@ -143,7 +148,6 @@ var CityGen = function(cName,cPosX,cPosY,cWidth,cHeight,cActive){
     this.active = cActive;
     
     this.addCity = function(){
-       /* cities.push(this.name);*/
         cities.push(this);
     }
     
@@ -165,7 +169,6 @@ var GunGen = function(gName,gPosX,gPosY,gRadius,gActive){
     this.active = gActive;
     
     this.addGun = function(){
-        /*guns.push(this.name);*/
         guns.push(this);
     }
     
@@ -186,9 +189,8 @@ function mouseXY(){
     myClicks[count] = myMouses;
     myMouses = [];
     
-    console.log('Click Coordinates are X = ' + mouseX + ', Y = ' + mouseY);
-    console.log('Clicks are: ' + myClicks[count]);
-   /* var t = setTimeout(mouse_position,100);*/
+    /*console.log('Click Coordinates are X = ' + mouseX + ', Y = ' + mouseY);
+    console.log('Clicks are: ' + myClicks[count]);*/
 }
 
 function prepareToFire(targetX,targetY){
@@ -204,9 +206,8 @@ function prepareToFire(targetX,targetY){
         alphaGun.firing = 'firing';
         bravoGun.firing = 'standby';
         charlieGun.firing = 'standby';
-        /*fireSlope = alphaS;*/
         aa = (targetX - alphaGun.x)/alphaD;
-        console.log(firingGun +' will fire');
+        /*console.log(firingGun +' will fire');*/
     } else if ((charlieD < bravoD) && (charlieD < alphaD) && (targetY < 400) && (charlieAmmo > 0)){
         var initX = charlieGun.x;
         var initY = charlieGun.y;
@@ -214,9 +215,8 @@ function prepareToFire(targetX,targetY){
         alphaGun.firing = 'standby';
         bravoGun.firing = 'standby';
         charlieGun.firing = 'firing';
-        /*fireSlope = charlieS;*/
         aa = (targetX - charlieGun.x)/charlieD;
-        console.log(firingGun +' will fire');
+        /*console.log(firingGun +' will fire');*/
     } else if ((bravoD <= alphaD) && (bravoD <= charlieD) && (targetY < 400) && (bravoAmmo > 0)){
         var initX = bravoGun.x;
         var initY = bravoGun.y;
@@ -224,32 +224,38 @@ function prepareToFire(targetX,targetY){
         alphaGun.firing = 'standby';
         bravoGun.firing = 'firing';
         charlieGun.firing = 'standby';
-        /*fireSlope = bravoS;*/
         aa = (targetX - bravoGun.x)/bravoD;
-        console.log(firingGun +' will fire');
+        /*console.log(firingGun +' will fire');*/
     } else {
         alphaGun.firing = 'standby';
         bravoGun.firing = 'standby';
         charlieGun.firing = 'standby';
-        console.log('No guns can fire');
+        /*console.log('No guns can fire');*/
     }
     
-    theta = Math.asin(aa);
-    deltaX = Math.sin(theta);
-    deltaY = Math.cos(theta);
+    vectorCalc(aa);
+    gunDeltaAr.push(eachDelta);
+    eachDelta = [];
 
     shoot = new BulletGen(firingGun + cStr,initX,initY,1,true);
     shoot.addBullet();
     shoot.drawBullet();
-    console.log('Bullet Array: ' + bullets);
-}
-
-function slope(x1,y1,x2,y2){
-    return (y2 - y1)/(x2 - x1);
+    /*console.log('Bullet Array: ' + bullets);
+    console.log('New Bullet Name: ' + bullets[count].name);*/
 }
 
 function distance(x1,y1,x2,y2){
     return Math.sqrt(Math.pow((y2 - y1),2) + Math.pow((x2 - x1),2));
+}
+
+function vectorCalc(disToTarget){
+    theta = Math.asin(disToTarget);
+        /*console.log('Theta = ' + theta + ' radians');*/
+    deltaX = Math.sin(theta);
+    deltaY = Math.cos(theta);
+    eachDelta.push(deltaX);
+    eachDelta.push(deltaY);
+        /*console.log('The deltas from eachDelta array: ' + deltaX + 'x, ' + deltaY + 'y');*/
 }
 
 /* Create the Bullets  */
@@ -257,31 +263,208 @@ var BulletGen = function(bName,bPosX,bPosY,bRadius,bActive){
     this.name = bName;
     this.x = bPosX;
     this.y = bPosY;
+    this.xInit = bPosX;
+    this.yInit = bPosY;
     this.radius = bRadius;
     this.active = bActive;
+    this.bLoop = 0;
+    this.explodeR = 1;
     
     this.addBullet = function(){
         bullets.push(this);
     }
     
     this.drawBullet = function(){
-        c.fillStyle = "#0d0384";
+        c.fillStyle = "#f00";
         c.moveTo(this.x,this.y);
         c.arc(this.x,this.y,this.radius,0,Math.PI*2,false);
         c.fill();
     }
+    
 };
 
+/* Create the Bullet Explosions  */
+var bulletExplode = function(x,y,indexE){
+    bullets[indexE].explodeR += 1;
+    c.fillStyle = "#f00";
+    c.moveTo(x,y);
+    c.arc(x,y,bullets[indexE].explodeR,0,Math.PI*2,false);
+    c.fill();
+    /*bulletImplode(bullets[indexE].x,bullets[indexE].y,indexE);*/
+};
+
+var bulletImplode = function(x,y,indexI){
+    /*console.log('It sees Implode');*/
+    while (bullets[indexI].explodeR > 0){
+        c.fillStyle = "#66cbf0";
+        c.moveTo(x,y);
+        c.arc(x,y,bullets[indexI].explodeR,0,Math.PI*2,false);
+        c.fill();
+        /*console.log('Explosion radius = ' + bullets[indexI].explodeR);*/
+        bullets[indexI].explodeR -= 1;
+    }
+        
+};
+
+/* Create the Missile Explosions  */
+var missileExplode = function(x,y,mIndexE){
+    missiles[mIndexE].explodeMR += 1;
+    c.fillStyle = "#1d00ff";
+    c.moveTo(x,y);
+    c.arc(x,y,missiles[mIndexE].explodeMR,0,Math.PI*2,false);
+    c.fill();
+};
+
+/* Create the Missiles  */
+var MissileGen = function(mName,mRadius,mActive){
+    this.name = mName;
+    this.x = Math.floor(Math.random()*741 + 10);
+    this.y = 0;
+    this.xInit = this.x;
+    this.yInit = 0;
+    this.radius = mRadius;
+    this.active = mActive;
+    this.explodeMR = 1;
+    this.explodeER = 1;
+    
+    this.addMissile = function(){
+        missiles.push(this);
+    }
+    
+    this.drawMissile = function(){
+        c.fillStyle = "#8d128d";
+        c.moveTo(this.x,this.y);
+        c.arc(this.x,this.y,this.radius,0,Math.PI*2,false);
+        c.fill();
+    }
+    
+    this.pickTarget = function(){
+        var missleTarget = Math.floor(Math.random()*9 + 1);
+            switch(missleTarget) {
+                case 1:
+                    this.tX = cities[0].x + 10;
+                    this.tY = cities[0].y + 15;
+                    break;
+                case 2:
+                    this.tX = cities[1].x + 10;
+                    this.tY = cities[1].y + 15;
+                    break;
+                case 3:
+                    this.tX = cities[2].x + 10;
+                    this.tY = cities[2].y + 15;
+                    break;
+                case 4:
+                    this.tX = cities[3].x + 10;
+                    this.tY = cities[3].y + 15;
+                    break;
+                case 5:
+                    this.tX = cities[4].x + 10;
+                    this.tY = cities[4].y + 15;
+                    break;
+                case 6:
+                    this.tX = cities[5].x + 10;
+                    this.tY = cities[5].y + 15;
+                    break;
+                case 7:
+                    this.tX = guns[0].x;
+                    this.tY = guns[0].y;
+                    break;
+                case 8:
+                    this.tX = guns[1].x;
+                    this.tY = guns[1].y;
+                    break;
+                case 9:
+                    this.tX = guns[2].x;
+                    this.tY = guns[2].y;
+            }
+    } 
+    
+};
+
+var eraseBM = function(x1,y1,x2,y2,t){
+        cErase.strokeStyle = "#66cbf0";
+        cErase.beginPath();
+        cErase.lineWidth = t;
+        cErase.lineCap = "round";
+        cErase.moveTo(x1,y1);
+        cErase.lineTo(x2,y2);
+        cErase.stroke();
+};
+
+var eraseMissileXP = function(x,y,emIndexE){
+    missiles[emIndexE].explodeER += 1;
+    cErase.fillStyle = "#66cbf0";
+    cErase.moveTo(x,y);
+    cErase.arc(x,y,missiles[emIndexE].explodeER,0,Math.PI*2,false);
+    cErase.fill();
+};
+
+/* Update Everything  */
 function update(){
     for (var i = 0; i < bullets.length; i++){
-        var oBx = bullets[i].x;
-        var oBy = bullets[i].y;
-        console.log('Old bullet X and Y: ' + oBx + ' & ' + oBy);
-        bullets[i].x += deltaX;
-        bullets[i].y -= deltaY;
-        console.log('New bullet X and Y: ' + bullets[i].x + ' & ' + bullets[i].y)
-        shoot.drawBullet();
+        if (bullets[i].y < myClicks[i][1]){
+            bullets[i].x += 0;
+            bullets[i].y -= 0;
+            if ((bullets[i].explodeR < 25) && (bullets[i].active = true)){
+                bulletExplode(bullets[i].x,bullets[i].y,i);
+                bullets[i].active = false;
+                setTimeout(eraseBM(bullets[i].xInit,bullets[i].yInit,bullets[i].x,bullets[i].y,2 * bullets[i].radius), 5000);
+            }
+        } else {
+            bullets[i].x += 3 * gunDeltaAr[i][0];
+            bullets[i].y -= 3 * gunDeltaAr[i][1];
+        }
     }
+    
+    /*for (var j = 0; j < 1; j++){*/
+    for (var j = 0; j < missiles.length; j++){
+        /*console.log('Missile x, y, tX, tY = ' + missiles[j].x + ', ' + missiles[j].y + ', ' + missiles[j].tX + ', ' + missiles[j].tY);
+        console.log('Missile Distance to Target = ' + missiles[j].vTarget);*/
+        vectorCalc(missiles[j].vtAngle);
+        /*console.log('Vector to target = ' + missiles[j].vtAngle);*/
+        missileDeltaAr[j] = eachDelta;
+        eachDelta = [];
+       /* console.log('Array missileDeltaAr: ' + missileDeltaAr);*/
+    }
+    
+    for (var k = 0; k < missiles.length; k++){
+        if (missiles[k].y >= missiles[k].tY){
+            missiles[k].x += 0;
+            missiles[k].y += 0;
+            if ((missiles[k].explodeMR < 25) && (missiles[k].active = true)){
+                missileExplode(missiles[k].x,missiles[k].y,k);
+                missiles[k].active = false;
+                setTimeout(eraseBM(missiles[k].xInit,missiles[k].yInit,missiles[k].x,missiles[k].y,2 * missiles[k].radius), 8000);
+                
+                /*var start = new Date().getTime();
+                for (var i = 0; i < 1e7; i++) {
+                    if ((new Date().getTime() - start) > 3000){
+                        setTimeout(eraseMissileXP(missiles[k].x,missiles[k].y,k), 8000);
+                    }
+                }*/
+                setTimeout(eraseMissileXP(missiles[k].x,missiles[k].y,k), 8000);
+               
+            }
+            
+        } else {
+            missiles[k].x += missileDeltaAr[k][0];
+            missiles[k].y += missileDeltaAr[k][1];
+        }
+    } 
+    
+    return;
+}
+
+
+/* Draw Everything  */
+function draw(){
+    for (var i = 0; i < bullets.length; i++){
+        bullets[i].drawBullet();
+    }
+    for (var j = 0; j < missiles.length; j++){
+        missiles[j].drawMissile();
+    }
+    return;
 }
 
 
@@ -301,7 +484,7 @@ $(function(){
         charlieGun = new GunGen('charlieGun',650,420,2,true);
             charlieGun.addGun();
             charlieGun.drawGun();
-        console.log('Gun Array: ' + guns);
+        /*console.log('Gun Array: ' + guns);*/
         
         groundGen();
         
@@ -323,31 +506,34 @@ $(function(){
         var charlieCity2 = new CityGen('charlieCity2',730,445,20,25,true);
             charlieCity2.addCity();
             charlieCity2.drawCity();
-        console.log('City Array: ' + cities);
+        /*console.log('City Array: ' + cities);*/
+        
+        var misslesPerIter = Math.floor(Math.random()*5 + 1);
+        for (var i = 0; i < misslesPerIter; i++){
+            var missEL = new MissileGen('missEL'+i,2,true);
+            missEL.pickTarget();
+            missEL.vTarget = distance(missEL.x,missEL.y,missEL.tX,missEL.tY);
+            missEL.vtAngle = (missEL.tX - missEL.x)/missEL.vTarget;
+            missEL.addMissile();
+            missEL.drawMissile();
+           /* console.log('Missile Array: ' + missiles + ', Target X = ' + missEL.tX + ', Target Y = ' + missEL.tY);*/
+        }
+        
         
         $canvas.on('click',function(){
             mouseXY();
             prepareToFire(mouseX,mouseY);
-            /*for (var j = 0; j < myClicks.length; j++){
-                prepareToFire(myClicks[count][0],myClicks[count][1]);
-                count++;
-            }*/
-            
-            /*groundGen();*/
-           
-            
-            
-            /*update();*/
             count++;
         });
         
         
-        var FPS = 500;
+        var FPS = 70;
         setInterval(function() {
-        update();
-        /*draw();*/
+            update();
+            draw();
+            iter++;
         }, 1000/FPS);
-          
+        
         
     }); 
     
