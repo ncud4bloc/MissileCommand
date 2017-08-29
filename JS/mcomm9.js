@@ -28,6 +28,7 @@ var eachDelta = [];
 var shoot;
 var bullets = [];
 var missiles = [];
+var explosions = [];
 var alphaAmmo = 5;      /* This will be modded later */
 var bravoAmmo = 5;      /* This will be modded later */
 var charlieAmmo = 5;    /* This will be modded later */
@@ -237,7 +238,7 @@ function prepareToFire(targetX,targetY){
     gunDeltaAr.push(eachDelta);
     eachDelta = [];
 
-    shoot = new BulletGen(firingGun + cStr,initX,initY,1,true);
+    shoot = new BulletGen(firingGun + cStr,initX,initY,1,true,"#f00");
     shoot.addBullet();
     shoot.drawBullet();
     /*console.log('Bullet Array: ' + bullets);
@@ -255,12 +256,12 @@ function vectorCalc(disToTarget){
     deltaY = Math.cos(theta);
     eachDelta.push(deltaX);
     eachDelta.push(deltaY);
-        /*console.log('The deltas from eachDelta array: ' + deltaX + 'x, ' + deltaY + 'y');*/
 }
 
 /* Create the Bullets  */
-var BulletGen = function(bName,bPosX,bPosY,bRadius,bActive){
+var BulletGen = function(bName,bPosX,bPosY,bRadius,bActive,bColor){
     this.name = bName;
+    this.color = bColor;
     this.x = bPosX;
     this.y = bPosY;
     this.xInit = bPosX;
@@ -268,7 +269,7 @@ var BulletGen = function(bName,bPosX,bPosY,bRadius,bActive){
     this.radius = bRadius;
     this.active = bActive;
     this.bLoop = 0;
-    this.explodeR = 1;
+    this.explodeR = 0;
     this.explodeBI = 0;
     
     this.addBullet = function(){
@@ -276,7 +277,7 @@ var BulletGen = function(bName,bPosX,bPosY,bRadius,bActive){
     }
     
     this.drawBullet = function(){
-        c.fillStyle = "#f00";
+        c.fillStyle = this.color;
         c.moveTo(this.x,this.y);
         c.arc(this.x,this.y,this.radius,0,Math.PI*2,false);
         c.fill();
@@ -285,40 +286,50 @@ var BulletGen = function(bName,bPosX,bPosY,bRadius,bActive){
 };
 
 /* Create the Bullet Explosions  */
-var bulletExplode = function(x,y,indexE){
+var bulletExplode = function(x,y,indexE,ebColor){
     bullets[indexE].explodeR += 1;
-    c.fillStyle = "#f00";
+    c.fillStyle = ebColor;
     c.moveTo(x,y);
     c.arc(x,y,bullets[indexE].explodeR,0,Math.PI*2,false);
     c.fill();
-    /*bulletImplode(bullets[indexE].x,bullets[indexE].y,indexE);*/
 };
 
-var bulletImplode = function(x,y,indexI){
-    /*console.log('It sees Implode');*/
-    while (bullets[indexI].explodeBI < 25){
-        c.fillStyle = "#66cbf0";
-        c.moveTo(x,y);
-        c.arc(x,y,bullets[indexI].explodeBI,0,Math.PI*2,false);
-        c.fill();
-        /*console.log('Explosion radius = ' + bullets[indexI].explodeBI);*/
-        bullets[indexI].explodeBI += 1;
+var Bexplodo = function(bname,bx,by,brad,bcolor,bactive){
+    this.name = bname;
+    this.color = bcolor;
+    this.x = bx;
+    this.y = by;
+    this.radius = brad;
+    this.active = bactive;
+    this.explodeBR = 0;
+    
+    this.addExplodo = function(){
+        explosions.push(this);
     }
-        
+    
+    this.drawExplosion = function(){
+        cErase.strokeStyle = this.color;
+        cErase.lineWidth = 5;
+        cErase.fillStyle = this.color;
+        cErase.moveTo(this.x,this.y);
+        cErase.arc(this.x,this.y,this.radius,0,Math.PI*2,false);
+        cErase.fill();
+        cErase.stroke();
+    }
 };
+
 
 /* Create the Missile Explosions  */
-var missileExplode = function(x,y,mIndexE){
+var missileExplode = function(x,y,mIndexE,mxColor){
     missiles[mIndexE].explodeMR += 1;
-    /*c.fillStyle = "#8d128d";*/
-    c.fillStyle = "#00f";   /* Temporary debug color */
+    c.fillStyle = mxColor;   
     c.moveTo(x,y);
     c.arc(x,y,missiles[mIndexE].explodeMR,0,Math.PI*2,false);
     c.fill();
 };
 
 /* Create the Missiles  */
-var MissileGen = function(mName,mRadius,mActive){
+var MissileGen = function(mName,mRadius,mActive,mColor){
     this.name = mName;
     this.x = Math.floor(Math.random()*741 + 10);
     this.y = 0;
@@ -326,6 +337,7 @@ var MissileGen = function(mName,mRadius,mActive){
     this.yInit = 0;
     this.radius = mRadius;
     this.active = mActive;
+    this.color = mColor;
     this.explodeMR = 1;
     this.explodeER = 1;
     
@@ -334,7 +346,7 @@ var MissileGen = function(mName,mRadius,mActive){
     }
     
     this.drawMissile = function(){
-        c.fillStyle = "#8d128d";
+        c.fillStyle = this.color;
         c.moveTo(this.x,this.y);
         c.arc(this.x,this.y,this.radius,0,Math.PI*2,false);
         c.fill();
@@ -412,23 +424,20 @@ function update(){
             bullets[i].x += 0;
             bullets[i].y -= 0;
             if ((bullets[i].explodeR < 25) && (bullets[i].active = true)){
-                bulletExplode(bullets[i].x,bullets[i].y,i);
+                bulletExplode(bullets[i].x,bullets[i].y,i,"#f00");
                 bullets[i].active = false;
                 setTimeout(eraseBM(bullets[i].xInit,bullets[i].yInit,bullets[i].x,bullets[i].y,2 * bullets[i].radius), 5000);
+                bullets[i].radius = 0;
                 
-                
-                /*setTimeout(eraseMissileXP(missiles[k].x,missiles[k].y,k), 8000);*/
-                if (bullets[i].explodeR >= 25){
-                    var z = 0;
-                    while (z < 12){
-        
-                        bulletImplode(bullets[i].x,bullets[i].y,i);  
-                        console.log('Working bullet....' + z);
-                        z++;
+                function myUnBEx(){
+                    var bPlo = new Bexplodo('bPlo'+i,bullets[i].x,bullets[i].y,25,"#66cbf0",true);
+                    bPlo.addExplodo();
+                    for (var s = 0; s < explosions.length; s++){
+                        explosions[s].drawExplosion();    
                     }
                 }
-                       
-                
+                myUnBEx();
+                           
             }
         } else {
             bullets[i].x += 3 * gunDeltaAr[i][0];
@@ -436,15 +445,10 @@ function update(){
         }
     }
     
-    /*for (var j = 0; j < 1; j++){*/
     for (var j = 0; j < missiles.length; j++){
-        /*console.log('Missile x, y, tX, tY = ' + missiles[j].x + ', ' + missiles[j].y + ', ' + missiles[j].tX + ', ' + missiles[j].tY);
-        console.log('Missile Distance to Target = ' + missiles[j].vTarget);*/
         vectorCalc(missiles[j].vtAngle);
-        /*console.log('Vector to target = ' + missiles[j].vtAngle);*/
         missileDeltaAr[j] = eachDelta;
         eachDelta = [];
-       /* console.log('Array missileDeltaAr: ' + missileDeltaAr);*/
     }
     
     for (var k = 0; k < missiles.length; k++){
@@ -452,39 +456,20 @@ function update(){
             missiles[k].x += 0;
             missiles[k].y += 0;
             if (missiles[k].explodeMR < 25){
-                missileExplode(missiles[k].x,missiles[k].y,k);
-                missiles[k].active = false;
-                setTimeout(eraseBM(missiles[k].xInit,missiles[k].yInit,missiles[k].x,missiles[k].y,2 * missiles[k].radius), 8000);
-                
-                
-                /*setTimeout(eraseMissileXP(missiles[k].x,missiles[k].y,k), 8000);*/
-                if ((missiles[k].explodeMR >= 25) && (missiles[k].explodeER < 25)){
-                    var z = 0;
-                    while (z < 12){
-                        
-                        /*var start = new Date().getTime();
-                        for (var i = 0; i < 1e7; i++) {
-                            if ((new Date().getTime() - start) > 1000){
-                                eraseMissileXP(missiles[k].x,missiles[k].y,k);
-                                console.log('Working....' + z);
-                            }
-                        }*/
-        
-                        eraseMissileXP(missiles[k].x,missiles[k].y,k);  
-                        console.log('Working....' + z);
-                        z++;
-                    }
+                /*missileExplode(missiles[k].x,missiles[k].y,k,"#faa");*/
+                function myUnEx(){
+                    setTimeout(missileExplode(missiles[k].x,missiles[k].y,k,"#66cbf0"),8000);
                 }
-               
-            }
-           
-            
+                myUnEx();
+                missiles[k].radius = 0;
+                missiles[k].active = false;
+                setTimeout(eraseBM(missiles[k].xInit,missiles[k].yInit,missiles[k].x,missiles[k].y,2 * missiles[k].radius), 8000);    
+            }   
         } else {
             missiles[k].x += missileDeltaAr[k][0];
             missiles[k].y += missileDeltaAr[k][1];
         }
     } 
-    
     return;
 }
 
@@ -517,7 +502,6 @@ $(function(){
         charlieGun = new GunGen('charlieGun',650,420,2,true);
             charlieGun.addGun();
             charlieGun.drawGun();
-        /*console.log('Gun Array: ' + guns);*/
         
         groundGen();
         
@@ -539,26 +523,22 @@ $(function(){
         var charlieCity2 = new CityGen('charlieCity2',730,445,20,25,true);
             charlieCity2.addCity();
             charlieCity2.drawCity();
-        /*console.log('City Array: ' + cities);*/
         
-        var misslesPerIter = Math.floor(Math.random()*1 + 1);
+        var misslesPerIter = Math.floor(Math.random()*5 + 1);
         for (var i = 0; i < misslesPerIter; i++){
-            var missEL = new MissileGen('missEL'+i,2,true);
+            var missEL = new MissileGen('missEL'+i,0.25,true,"#8d128d");
             missEL.pickTarget();
             missEL.vTarget = distance(missEL.x,missEL.y,missEL.tX,missEL.tY);
             missEL.vtAngle = (missEL.tX - missEL.x)/missEL.vTarget;
             missEL.addMissile();
             missEL.drawMissile();
-           /* console.log('Missile Array: ' + missiles + ', Target X = ' + missEL.tX + ', Target Y = ' + missEL.tY);*/
         }
-        
         
         $canvas.on('click',function(){
             mouseXY();
             prepareToFire(mouseX,mouseY);
             count++;
         });
-        
         
         var FPS = 70;
         setInterval(function() {
@@ -567,6 +547,19 @@ $(function(){
             iter++;
         }, 1000/FPS);
         
+        /*window.requestAnimFrame = (function(){
+            return  window.requestAnimFrame  ||
+                    window.webkitRequestAnimFrame  ||
+                    window.mozRequestAnimFrame  ||
+                    window.oRequestAnimFrame  ||
+                    window.msRequestAnimFrame  ||
+                    function( callback ){
+                        window.setTimeout(callback, 1000 / 60);
+                    };
+            
+        })();
+        window.requestAnimFrame(update);
+        window.requestAnimFrame(draw);*/
         
     }); 
     

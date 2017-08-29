@@ -269,7 +269,6 @@ var BulletGen = function(bName,bPosX,bPosY,bRadius,bActive){
     this.active = bActive;
     this.bLoop = 0;
     this.explodeR = 1;
-    this.explodeBI = 0;
     
     this.addBullet = function(){
         bullets.push(this);
@@ -296,13 +295,13 @@ var bulletExplode = function(x,y,indexE){
 
 var bulletImplode = function(x,y,indexI){
     /*console.log('It sees Implode');*/
-    while (bullets[indexI].explodeBI < 25){
+    while (bullets[indexI].explodeR > 0){
         c.fillStyle = "#66cbf0";
         c.moveTo(x,y);
-        c.arc(x,y,bullets[indexI].explodeBI,0,Math.PI*2,false);
+        c.arc(x,y,bullets[indexI].explodeR,0,Math.PI*2,false);
         c.fill();
-        /*console.log('Explosion radius = ' + bullets[indexI].explodeBI);*/
-        bullets[indexI].explodeBI += 1;
+        /*console.log('Explosion radius = ' + bullets[indexI].explodeR);*/
+        bullets[indexI].explodeR -= 1;
     }
         
 };
@@ -310,8 +309,7 @@ var bulletImplode = function(x,y,indexI){
 /* Create the Missile Explosions  */
 var missileExplode = function(x,y,mIndexE){
     missiles[mIndexE].explodeMR += 1;
-    /*c.fillStyle = "#8d128d";*/
-    c.fillStyle = "#00f";   /* Temporary debug color */
+    c.fillStyle = "#1d00ff";
     c.moveTo(x,y);
     c.arc(x,y,missiles[mIndexE].explodeMR,0,Math.PI*2,false);
     c.fill();
@@ -394,15 +392,11 @@ var eraseBM = function(x1,y1,x2,y2,t){
 };
 
 var eraseMissileXP = function(x,y,emIndexE){
-        console.log('Missile explosion radius = ' + missiles[emIndexE].explodeER);
     missiles[emIndexE].explodeER += 1;
-    cErase.strokeStyle = "#66cbf0";
-    cErase.lineWidth = 30;
     cErase.fillStyle = "#66cbf0";
     cErase.moveTo(x,y);
     cErase.arc(x,y,missiles[emIndexE].explodeER,0,Math.PI*2,false);
     cErase.fill();
-    cErase.stroke();
 };
 
 /* Update Everything  */
@@ -415,20 +409,6 @@ function update(){
                 bulletExplode(bullets[i].x,bullets[i].y,i);
                 bullets[i].active = false;
                 setTimeout(eraseBM(bullets[i].xInit,bullets[i].yInit,bullets[i].x,bullets[i].y,2 * bullets[i].radius), 5000);
-                
-                
-                /*setTimeout(eraseMissileXP(missiles[k].x,missiles[k].y,k), 8000);*/
-                if (bullets[i].explodeR >= 25){
-                    var z = 0;
-                    while (z < 12){
-        
-                        bulletImplode(bullets[i].x,bullets[i].y,i);  
-                        console.log('Working bullet....' + z);
-                        z++;
-                    }
-                }
-                       
-                
             }
         } else {
             bullets[i].x += 3 * gunDeltaAr[i][0];
@@ -451,33 +431,20 @@ function update(){
         if (missiles[k].y >= missiles[k].tY){
             missiles[k].x += 0;
             missiles[k].y += 0;
-            if (missiles[k].explodeMR < 25){
+            if ((missiles[k].explodeMR < 25) && (missiles[k].active = true)){
                 missileExplode(missiles[k].x,missiles[k].y,k);
                 missiles[k].active = false;
                 setTimeout(eraseBM(missiles[k].xInit,missiles[k].yInit,missiles[k].x,missiles[k].y,2 * missiles[k].radius), 8000);
                 
-                
-                /*setTimeout(eraseMissileXP(missiles[k].x,missiles[k].y,k), 8000);*/
-                if ((missiles[k].explodeMR >= 25) && (missiles[k].explodeER < 25)){
-                    var z = 0;
-                    while (z < 12){
-                        
-                        /*var start = new Date().getTime();
-                        for (var i = 0; i < 1e7; i++) {
-                            if ((new Date().getTime() - start) > 1000){
-                                eraseMissileXP(missiles[k].x,missiles[k].y,k);
-                                console.log('Working....' + z);
-                            }
-                        }*/
-        
-                        eraseMissileXP(missiles[k].x,missiles[k].y,k);  
-                        console.log('Working....' + z);
-                        z++;
+                /*var start = new Date().getTime();
+                for (var i = 0; i < 1e7; i++) {
+                    if ((new Date().getTime() - start) > 3000){
+                        setTimeout(eraseMissileXP(missiles[k].x,missiles[k].y,k), 8000);
                     }
-                }
+                }*/
+                /*setTimeout(eraseMissileXP(missiles[k].x,missiles[k].y,k), 8000);*/
                
             }
-           
             
         } else {
             missiles[k].x += missileDeltaAr[k][0];
@@ -488,12 +455,32 @@ function update(){
     return;
 }
 
+function unExp(){
+    var start = new Date().getTime();
+        for (var i = 0; i < 1e7; i++) {
+            if ((new Date().getTime() - start) > 3000){             
+                for (var k = 0; k < missiles.length; k++){
+                    if ((missiles[k].y >= missiles[k].tY) && (missiles[k].explodeMR == 25) && (missiles[k].explodeER < 25)){
+                        setTimeout(eraseMissileXP(missiles[k].x,missiles[k].y,k), 800);
+                    } 
+                }    
+            }
+        }
+}
+
 
 /* Draw Everything  */
 function draw(){
     for (var i = 0; i < bullets.length; i++){
         bullets[i].drawBullet();
     }
+    for (var j = 0; j < missiles.length; j++){
+        missiles[j].drawMissile();
+    }
+    return;
+}
+
+function unDraw(){
     for (var j = 0; j < missiles.length; j++){
         missiles[j].drawMissile();
     }
@@ -541,7 +528,7 @@ $(function(){
             charlieCity2.drawCity();
         /*console.log('City Array: ' + cities);*/
         
-        var misslesPerIter = Math.floor(Math.random()*1 + 1);
+        var misslesPerIter = Math.floor(Math.random()*5 + 1);
         for (var i = 0; i < misslesPerIter; i++){
             var missEL = new MissileGen('missEL'+i,2,true);
             missEL.pickTarget();
@@ -564,6 +551,8 @@ $(function(){
         setInterval(function() {
             update();
             draw();
+            unExp();
+            unDraw();
             iter++;
         }, 1000/FPS);
         
