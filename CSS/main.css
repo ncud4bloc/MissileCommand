@@ -1,0 +1,68 @@
+body {
+    width: 100%;
+    background-color: #0e1f83;
+}
+
+#content {
+    width: 800px;
+    height: 600px;
+    border: 5px solid #000;
+    margin: 25px auto;
+    background-color: #b5b6b7;
+}
+
+#gStatus {
+    height: 70px;
+    width: 200px;
+    float: left;
+    text-align: center;
+    color: #000;
+    margin-right: 100px;
+    background-color: #5e5c95;
+    border: 1px solid #f00;
+    padding-top: 22px;
+    padding-left: 25px;
+    padding-right: 25px;
+    font-size: 18px;
+}
+
+#gStart {
+    height: 70px;
+    width: 200px;
+    float: left;
+    text-align: center;
+    color: #000;
+    margin: 0 auto;
+    background-color: #5e5c95;
+    border: 1px solid #f00;
+    padding-top: 5px;
+    padding-left: 25px;
+    padding-right: 25px;
+    font-family: "Courgette",cursive;
+    font-family: "Lemonada";
+    font-size: 25px;
+    font-weight: 900;
+}
+
+#gData {
+    height: 70px;
+    width: 200px;
+    float: right;
+    text-align: center;
+    color: #000;
+    margin: 0;
+    background-color: #5e5c95;
+    border: 1px solid #f00;
+    padding-top: 22px;
+    padding-left: 25px;
+    padding-right: 25px;
+    font-size: 18px;
+}
+#gameBoard {
+    height: 520px;
+    width: 790px;
+    margin: 0 auto;
+    padding-right: 0px;
+    background-color: #66cbf0;
+    border: 5px ridge #898a8b;
+}
