@@ -1,15 +1,3 @@
-var missileDeltaAr = [];
-var explosions = [];
-
-/* Create the Bullet Explosions  */
-var antiMissileExplode = function(x,y,indexE,ebColor){
-    antiMissiles[indexE].explodeR += 1;
-    c.fillStyle = ebColor;
-    c.moveTo(x,y);
-    c.arc(x,y,antiMissiles[indexE].explodeR,0,Math.PI*2,false);
-    c.fill();
-};
-
 var Bexplodo = function(bname,bx,by,brad,bcolor,bactive){
     this.name = bname;
     this.color = bcolor;
@@ -34,18 +22,6 @@ var Bexplodo = function(bname,bx,by,brad,bcolor,bactive){
     }
 };
 
-
-/* Create the Missile Explosions  */
-var missileExplode = function(x,y,mIndexE,mxColor){
-    missiles[mIndexE].explodeMR += 1;
-    c.fillStyle = mxColor;   
-    c.moveTo(x,y);
-    c.arc(x,y,missiles[mIndexE].explodeMR,0,Math.PI*2,false);
-    c.fill();
-};
-
-
-
 var eraseBM = function(x1,y1,x2,y2,t){
         cErase.strokeStyle = "#66cbf0";
         cErase.beginPath();
@@ -68,33 +44,3 @@ var eraseMissileXP = function(x,y,emIndexE){
     cErase.stroke();
 };
 
-
-
-
-/* Draw Everything  */
-function draw(){
-    for (var i = 0; i < antiMissiles.length; i++){
-        antiMissiles[i].drawAntiMissile();
-    }
-    for (var j = 0; j < missiles.length; j++){
-        missiles[j].drawMissile();
-    }
-    return;
-}
-
-
-/* ---------------  Function Calls  --------------- */
-
-$(function(){
-    
-    $start.on('click',function(){ 
-        
-        var FPS = 70;
-        setInterval(function() {
-            update();
-            draw();
-        }, 1000/FPS);
-        
-    }); 
-    
-});

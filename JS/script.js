@@ -21,9 +21,14 @@ var missileDeltaAr = [];// array of all of the missile deltas (an array of eachD
 var cities = [];        // array of all city objects
 var guns = [];          // array of all city defensive artilliery objects
 var firingGun;          // current gun that is active and firing
+var explosionXY = [];   // array consisting of a single explosion X & Y
+var explosionsAtk = [];    // array of all the attackers successful hits
+var explosionsDef = [];    // array of all the defenders successful missile shootdowns
 
 var canvas = document.getElementById('canvas');
 var c = canvas.getContext('2d');
+var cMissile = canvas.getContext('2d');
+var cAntiMissile = canvas.getContext('2d');
 var cErase = canvas.getContext('2d');
 
 
@@ -103,7 +108,7 @@ var GunGen = function(gName,gPosX,gPosY,gRadius,gActive){
     this.radius = gRadius;
     this.active = gActive;
     this.firing = 'standby';
-    this.ammo = 25;
+    this.ammo = 20;
     
     this.addGun = function(){
         guns.push(this);
@@ -129,16 +134,17 @@ var AntiMissileGen = function(bName,bPosX,bPosY,bRadius,bActive,bColor){
     this.active = bActive;
     this.detonated = 'false';
     this.explodeR = 0;
+    this.explodeEraseR = 27;
     
     this.addAntiMissile = function(){
         antiMissiles.push(this);
     }
     
     this.drawAntiMissile = function(){
-        c.fillStyle = this.color;
-        c.moveTo(this.x,this.y);
-        c.arc(this.x,this.y,this.radius,0,Math.PI*2,false);
-        c.fill();
+        cAntiMissile.fillStyle = this.color;
+        cAntiMissile.moveTo(this.x,this.y);
+        cAntiMissile.arc(this.x,this.y,this.radius,0,Math.PI*2,false);
+        cAntiMissile.fill();
     }
     
 };
@@ -194,13 +200,24 @@ function defensiveFireControl(targetX,targetY){
     console.log('New Bullet Name: ' + antiMissiles[count].name);*/
 }
 
-/* Create the Anti-Missile Explosions  */
+/* Create the Anti-Missile Explosions and Erase Explosions  */
 var antiMissileExplode = function(x,y,indexE,ebColor){
     antiMissiles[indexE].explodeR += 1;
-    c.fillStyle = ebColor;
-    c.moveTo(x,y);
-    c.arc(x,y,antiMissiles[indexE].explodeR,0,Math.PI*2,false);
-    c.fill();
+    cAntiMissile.fillStyle = ebColor;
+    cAntiMissile.moveTo(x,y);
+    cAntiMissile.arc(x,y,antiMissiles[indexE].explodeR,0,Math.PI*2,false);
+    cAntiMissile.fill();
+    explosionXY.push(x);
+    explosionXY.push(y);
+    explosionsDef[indexE] = explosionXY;
+    explosionXY = [];
+};
+var antiMissileExplodeErase = function(x,y,indexE,ebColor){
+    antiMissiles[indexE].explodeEraseR -= 1;
+    cAntiMissile.fillStyle = ebColor;
+    cAntiMissile.moveTo(x,y);
+    cAntiMissile.arc(x,y,antiMissiles[indexE].explodeEraseR,0,Math.PI*2,false);
+    cAntiMissile.fill();
 };
 
 /* Create the Missiles  */
@@ -222,10 +239,10 @@ var MissileGen = function(mName,mRadius,mActive,mColor){
     }
     
     this.drawMissile = function(){
-        c.fillStyle = this.color;
-        c.moveTo(this.x,this.y);
-        c.arc(this.x,this.y,this.radius,0,Math.PI*2,false);
-        c.fill();
+        cMissile.fillStyle = this.color;
+        cMissile.moveTo(this.x,this.y);
+        cMissile.arc(this.x,this.y,this.radius,0,Math.PI*2,false);
+        cMissile.fill();
     }
     
     this.pickTarget = function(){
@@ -287,10 +304,14 @@ function offensiveFireControl(){
 /* Create the Attack Missile Explosions  */
 var missileExplode = function(x,y,mIndexE,mxColor){
     missiles[mIndexE].explodeMR += 1;
-    c.fillStyle = mxColor;   
-    c.moveTo(x,y);
-    c.arc(x,y,missiles[mIndexE].explodeMR,0,Math.PI*2,false);
-    c.fill();
+    cMissile.fillStyle = mxColor;   
+    cMissile.moveTo(x,y);
+    cMissile.arc(x,y,missiles[mIndexE].explodeMR,0,Math.PI*2,false);
+    cMissile.fill();
+    explosionXY.push(x);
+    explosionXY.push(y);
+    explosionsAtk[mIndexE] = explosionXY;
+    explosionXY = [];
 };
 
 /* Update the Anti-Missile Positions and Status */
@@ -301,9 +322,9 @@ function updateAntiMissiles(){
             antiMissiles[i].x += 0;
             antiMissiles[i].y -= 0;
             antiMissiles[i].detonated = 'true';
-            if ((antiMissiles[i].explodeR < 25) && (antiMissiles[i].active = true)){
+            if ((antiMissiles[i].explodeR < 25) && (antiMissiles[i].active == true)){
                 antiMissileExplode(antiMissiles[i].x,antiMissiles[i].y,i,"#f00");
-                antiMissiles[i].active = false;
+                /*antiMissiles[i].active = false;*/
                
                 /*               setTimeout(eraseBM(antiMissiles[i].xInit,antiMissiles[i].yInit,antiMissiles[i].x,antiMissiles[i].y,2 * antiMissiles[i].radius), 5000);
                 antiMissiles[i].radius = 0;
@@ -317,7 +338,11 @@ function updateAntiMissiles(){
                 }
                 myUnBEx();
                 */
+                
                            
+            }
+            if ((antiMissiles[i].explodeR == 25) && (antiMissiles[i].explodeEraseR > 0)){
+                antiMissileExplodeErase(antiMissiles[i].x,antiMissiles[i].y,i,"#66cbf0");
             }
         } else {
             antiMissiles[i].x += 3 * gunDeltaAr[i][0];
@@ -417,7 +442,6 @@ $(function(){
         offensiveFireControl();
         
         $('#canvas').on('click',function(){
-        //$canvas.on('click',function(){
             mouseXY();
             defensiveFireControl(mouseX,mouseY);
             count++;
