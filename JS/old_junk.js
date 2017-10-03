@@ -22,15 +22,7 @@ var Bexplodo = function(bname,bx,by,brad,bcolor,bactive){
     }
 };
 
-var eraseBM = function(x1,y1,x2,y2,t){
-        cErase.strokeStyle = "#66cbf0";
-        cErase.beginPath();
-        cErase.lineWidth = t;
-        cErase.lineCap = "round";
-        cErase.moveTo(x1,y1);
-        cErase.lineTo(x2,y2);
-        cErase.stroke();
-};
+
 
 var eraseMissileXP = function(x,y,emIndexE){
         console.log('Missile explosion radius = ' + missiles[emIndexE].explodeER);

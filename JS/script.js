@@ -27,6 +27,7 @@ var explosionsDef = [];    // array of all the defenders successful missile shoo
 
 var canvas = document.getElementById('canvas');
 var c = canvas.getContext('2d');
+var cGun = canvas.getContext('2d');
 var cMissile = canvas.getContext('2d');
 var cAntiMissile = canvas.getContext('2d');
 var cErase = canvas.getContext('2d');
@@ -36,10 +37,12 @@ var cErase = canvas.getContext('2d');
 /* ---------------  Functions  --------------- */
 
 /* Create the Ground Graphics  */
-var groundGen = function(){
-    for(var i = 0;i < 4;i++){
-        c.fillStyle = "#14f514";
+var GroundGen = function(){
+/*var groundGen = function(){*/
+    for(var i = 0;i < 3;i++){
+        /*c.fillStyle = "#14f514";*/
         c.beginPath();
+        c.fillStyle = "#14f514";
         c.moveTo(i*260,470);
         c.lineTo(i*260+80,470);
         c.lineTo(i*260+130,420);
@@ -47,8 +50,9 @@ var groundGen = function(){
         c.lineTo(i*260+260,470);
         c.lineTo(i*260+260,530);
         c.lineTo(i*260,530);
-        c.closePath();
         c.fill();
+        c.closePath();
+        /*c.fill();*/
     }
 };
 
@@ -115,10 +119,12 @@ var GunGen = function(gName,gPosX,gPosY,gRadius,gActive){
     }
     
     this.drawGun = function(){
-        c.fillStyle = "#f00";
-        c.moveTo(this.x,this.y);
-        c.arc(this.x,this.y,this.radius,0,Math.PI*2,false);
-        c.fill();
+        cGun.beginPath();
+        cGun.fillStyle = "#f00";
+        cGun.moveTo(this.x,this.y);
+        cGun.arc(this.x,this.y,this.radius,0,Math.PI*2,false);
+        cGun.fill();
+        cGun.closePath();
     }
 };
 
@@ -141,10 +147,12 @@ var AntiMissileGen = function(bName,bPosX,bPosY,bRadius,bActive,bColor){
     }
     
     this.drawAntiMissile = function(){
+        cAntiMissile.beginPath();
         cAntiMissile.fillStyle = this.color;
         cAntiMissile.moveTo(this.x,this.y);
         cAntiMissile.arc(this.x,this.y,this.radius,0,Math.PI*2,false);
         cAntiMissile.fill();
+        cAntiMissile.closePath();
     }
     
 };
@@ -200,13 +208,15 @@ function defensiveFireControl(targetX,targetY){
     console.log('New Bullet Name: ' + antiMissiles[count].name);*/
 }
 
-/* Create the Anti-Missile Explosions and Erase Explosions  */
+/* Create the Anti-Missile Explosions and Erase Tracer & Explosions  */
 var antiMissileExplode = function(x,y,indexE,ebColor){
     antiMissiles[indexE].explodeR += 1;
+    cAntiMissile.beginPath();
     cAntiMissile.fillStyle = ebColor;
     cAntiMissile.moveTo(x,y);
     cAntiMissile.arc(x,y,antiMissiles[indexE].explodeR,0,Math.PI*2,false);
     cAntiMissile.fill();
+    cAntiMissile.closePath();
     explosionXY.push(x);
     explosionXY.push(y);
     explosionsDef[indexE] = explosionXY;
@@ -214,10 +224,22 @@ var antiMissileExplode = function(x,y,indexE,ebColor){
 };
 var antiMissileExplodeErase = function(x,y,indexE,ebColor){
     antiMissiles[indexE].explodeEraseR -= 1;
+    cAntiMissile.beginPath();
     cAntiMissile.fillStyle = ebColor;
     cAntiMissile.moveTo(x,y);
     cAntiMissile.arc(x,y,antiMissiles[indexE].explodeEraseR,0,Math.PI*2,false);
     cAntiMissile.fill();
+    cAntiMissile.closePath();
+};
+var antiMissilePathErase = function(x1,y1,x2,y2,t){
+        cAntiMissile.beginPath();
+        cAntiMissile.strokeStyle = "#66cbf0";
+        cAntiMissile.lineWidth = t;
+        cAntiMissile.lineCap = "round";
+        cAntiMissile.moveTo(x1,y1);
+        cAntiMissile.lineTo(x2,y2);
+        cAntiMissile.stroke();
+        cAntiMissile.closePath();
 };
 
 /* Create the Missiles  */
@@ -232,17 +254,19 @@ var MissileGen = function(mName,mRadius,mActive,mColor){
     this.color = mColor;
     this.detonated = 'false';
     this.explodeMR = 1;
-    this.explodeER = 1;
+    this.explodeEraseMR = 27;
     
     this.addMissile = function(){
         missiles.push(this);
     }
     
     this.drawMissile = function(){
+        cMissile.beginPath();
         cMissile.fillStyle = this.color;
         cMissile.moveTo(this.x,this.y);
         cMissile.arc(this.x,this.y,this.radius,0,Math.PI*2,false);
         cMissile.fill();
+        cMissile.closePath();
     }
     
     this.pickTarget = function(){
@@ -298,20 +322,42 @@ function offensiveFireControl(){
             missEL.vtAngle = (missEL.tX - missEL.x)/missEL.vTarget;
             missEL.addMissile();
             missEL.drawMissile();
-        }   
+        }
+    return;
 }
 
-/* Create the Attack Missile Explosions  */
+/* Create the Attack Missile Explosions and Erase Tracer & Explosions  */
 var missileExplode = function(x,y,mIndexE,mxColor){
     missiles[mIndexE].explodeMR += 1;
+    cMissile.beginPath();
     cMissile.fillStyle = mxColor;   
     cMissile.moveTo(x,y);
     cMissile.arc(x,y,missiles[mIndexE].explodeMR,0,Math.PI*2,false);
     cMissile.fill();
+    cMissile.closePath();
     explosionXY.push(x);
     explosionXY.push(y);
     explosionsAtk[mIndexE] = explosionXY;
     explosionXY = [];
+};
+var missileExplodeErase = function(x,y,indexE,ebColor){
+    missiles[indexE].explodeEraseMR -= 1;
+    cMissile.beginPath();
+    cMissile.fillStyle = ebColor;
+    cMissile.moveTo(x,y);
+    cMissile.arc(x,y,missiles[indexE].explodeEraseMR,0,Math.PI*2,false);
+    cMissile.fill();
+    cMissile.closePath();
+};
+var missilePathErase = function(x1,y1,x2,y2,t){
+    cMissile.beginPath();
+    cMissile.strokeStyle = "#66cbf0";
+    cMissile.lineWidth = t;
+    cMissile.lineCap = "round";
+    cMissile.moveTo(x1,y1);
+    cMissile.lineTo(x2,y2);
+    cMissile.stroke();
+    cMissile.closePath();
 };
 
 /* Update the Anti-Missile Positions and Status */
@@ -323,33 +369,18 @@ function updateAntiMissiles(){
             antiMissiles[i].y -= 0;
             antiMissiles[i].detonated = 'true';
             if ((antiMissiles[i].explodeR < 25) && (antiMissiles[i].active == true)){
-                antiMissileExplode(antiMissiles[i].x,antiMissiles[i].y,i,"#f00");
-                /*antiMissiles[i].active = false;*/
-               
-                /*               setTimeout(eraseBM(antiMissiles[i].xInit,antiMissiles[i].yInit,antiMissiles[i].x,antiMissiles[i].y,2 * antiMissiles[i].radius), 5000);
-                antiMissiles[i].radius = 0;
-                
-                function myUnBEx(){
-                    var bPlo = new Bexplodo('bPlo'+i,antiMissiles[i].x,antiMissiles[i].y,25,"#66cbf0",true);
-                    bPlo.addExplodo();
-                    for (var s = 0; s < explosions.length; s++){
-                        explosions[s].drawExplosion();    
-                    }
-                }
-                myUnBEx();
-                */
-                
-                           
+                antiMissileExplode(antiMissiles[i].x,antiMissiles[i].y,i,"#f00");    
             }
             if ((antiMissiles[i].explodeR == 25) && (antiMissiles[i].explodeEraseR > 0)){
                 antiMissileExplodeErase(antiMissiles[i].x,antiMissiles[i].y,i,"#66cbf0");
+                setTimeout(antiMissilePathErase(antiMissiles[i].xInit,antiMissiles[i].yInit,antiMissiles[i].x,antiMissiles[i].y,2 * antiMissiles[i].radius), 5000);
+                antiMissiles[i].radius = 0;
             }
         } else {
             antiMissiles[i].x += 3 * gunDeltaAr[i][0];
             antiMissiles[i].y -= 3 * gunDeltaAr[i][1];
         }
-    }
-    
+    }    
 }
 
 /* Update the Missile Positions and Status */
@@ -362,25 +393,19 @@ function updateMissiles(){
             missiles[k].x += 0;
             missiles[k].y += 0;
             missiles[k].detonated = 'true';
-            
-            
             if (missiles[k].explodeMR < 25){
-                missileExplode(missiles[k].x,missiles[k].y,k,"#faa");
-                /*function myUnEx(){
-                    setTimeout(missileExplode(missiles[k].x,missiles[k].y,k,"#66cbf0"),8000);
-                }
-                myUnEx();
+                missileExplode(missiles[k].x,missiles[k].y,k,"#8d128d"); 
+            }
+            if ((missiles[k].explodeMR == 25) && (missiles[k].explodeEraseMR > 0)){
+                missileExplodeErase(missiles[k].x,missiles[k].y,k,"#66cbf0");
+                setTimeout(missilePathErase(missiles[k].xInit,missiles[k].yInit,missiles[k].x,missiles[k].y,2 * missiles[k].radius), 5000);
                 missiles[k].radius = 0;
-                missiles[k].active = false;
-                setTimeout(eraseBM(missiles[k].xInit,missiles[k].yInit,missiles[k].x,missiles[k].y,2 * missiles[k].radius), 8000); */   
             }  
-            
         } else {
             missiles[k].x += missileDeltaAr[k][0];
             missiles[k].y += missileDeltaAr[k][1];
         }
     }
-
 }
 
 /* Update Everything  */
@@ -406,9 +431,7 @@ function draw(){
 
 $(function(){
     
-    $('#gStart').on('click',function(){
-        
-        groundGen(); 
+        var ground = new GroundGen();
         
         var alphaCity1 = new CityGen('alphaCity1',30,445,20,25,true);
             alphaCity1.addCity();
@@ -438,6 +461,8 @@ $(function(){
         charlieGun = new GunGen('charlieGun',650,420,2,true);
             charlieGun.addGun();
             charlieGun.drawGun();
+        
+    $('#gStart').on('click',function(){
         
         offensiveFireControl();
         
