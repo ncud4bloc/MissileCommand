@@ -13,45 +13,29 @@ body {
 
 #gStatus {
     height: 70px;
-    /*width: 200px;*/
-    width: 325px;
+    width: 200px;
     float: left;
     text-align: center;
     color: #000;
-    /*margin-right: 100px;*/
-    background-color: #dd9839;
+    margin-right: 100px;
+    background-color: #5e5c95;
     border: 1px solid #000;
-    /*padding-top: 22px;*/
-    padding-top: 5px;
+    padding-top: 22px;
     padding-left: 25px;
     padding-right: 25px;
     font-size: 18px;
 }
 
-#aTitle, #dTitle {
-    margin: 5px auto 5px auto;
-}
-
-.ammoInfo, .statInfo {
-    font-family: "Courgette",cursive;
-    font-size: 16px;
-    width: 90px;
-    float: left;
-}
-
 #gStart {
     height: 70px;
-    /*width: 200px;*/
-    width: 140px;
+    width: 200px;
     float: left;
     text-align: center;
     color: #000;
     margin: 0 auto;
     background-color: #5e5c95;
-    border: 1px solid #5e5c95;
-    border-top: 1px solid #000;
-    border-bottom: 1px solid #000;
-    padding-top: 8px;
+    border: 1px solid #f00;
+    padding-top: 5px;
     padding-left: 25px;
     padding-right: 25px;
     font-family: "Courgette",cursive;
@@ -62,30 +46,18 @@ body {
 
 #gData {
     height: 70px;
-    /*width: 200px;*/
-    width: 325px;
+    width: 200px;
     float: right;
     text-align: center;
     color: #000;
-    /*margin: 0;*/
-    background-color: #dd9839;
-    border: 1px solid #000;
-    /*padding-top: 22px;*/
-    padding-top: 5px;
+    margin: 0;
+    background-color: #5e5c95;
+    border: 1px solid #f00;
+    padding-top: 22px;
     padding-left: 25px;
     padding-right: 25px;
     font-size: 18px;
 }
-
-#levelI, #cityI {
-    width: 80px;
-}
-
-#scoreI {
-    width: 90px;
-    padding-left: 4px;
-}
-
 #gameBoard {
     height: 520px;
     width: 790px;
