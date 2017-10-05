@@ -19,13 +19,14 @@ var antiMissiles = [];  // array of all fired anti-missiles
 var missiles = [];      // array of all attacking missiles
 var missileDeltaAr = [];// array of all of the missile deltas (an array of eachDelta arrays)
 var numCities = 6;      // initial number of cities at game start
+var numGuns = 3;        // initial number of guns at game start
 var cities = [];        // array of all city objects
 var guns = [];          // array of all city defensive artilliery objects
 var firingGun;          // current gun that is active and firing
 var explosionXY = [];   // array consisting of a single explosion X & Y
 var explosionsAtk = []; // array of all the attackers successful hits
 var explosionsDef = []; // array of all the defenders successful missile shootdowns
-var detonatePrev = 100; // initial detonation distance used to calcuate time of explosion
+var detonatePrev = 900; // initial detonation distance used to calcuate time of explosion
 
 var canvas = document.getElementById('canvas');
 var c = canvas.getContext('2d');
@@ -370,24 +371,7 @@ var missilePathErase = function(x1,y1,x2,y2,t){
     cMissile.closePath();
 };
 
-/* Determine if Anti-Missile Intercepted Attack Missile or if Missile Hit Target City/Gun */
-/*function intercept(weaponAR,targetAR,killzone){
-    for (var i=0; i< weaponAR.length; i++){
-        var xPlus = weaponAR[i].x + killzone;
-        var xMinus = weaponAR[i].x - killzone;
-        var yPlus = weaponAR[i].y + killzone;
-        var yMinus = weaponAR[i].y - killzone;
-        for (var j=0; j< targetAR.length; j++){
-            if((weaponAR[i].active == true) && (targetAR[j].active == true) && (targetAR[j].x < xPlus) && (targetAR[j].x > xMinus) && (targetAR[j].y < yPlus) && (targetAR[j].y > xMinus)){
-                weaponAR[i].active = false;
-                targetAR[j].active = false;
-                console.log(weaponAR[i].name + ' scored a hit!');
-            }
-        }
-    }
-}*/
-
-/* Determine if Anti-Missile Intercepted Attack Missile or if Missile Hit Target City/Gun */
+/* Determine if Anti-Missile Intercepted Attack Missile */
 function intercept(weaponAR,targetAR,killzone){
     for (var i=0; i< weaponAR.length; i++){
         var xPlus = weaponAR[i].x + killzone;
@@ -423,6 +407,34 @@ function intercept(weaponAR,targetAR,killzone){
                     detonatePrev = detonate;
                 }
                     
+            }
+        }
+    }
+}
+
+/* Determine if Missile Hit Target City */
+function hitCity(killzone){
+    for (var i=0; i< missiles.length; i++){
+        var xPlus = missiles[i].x + killzone;
+        var xMinus = missiles[i].x - killzone;
+        for (var j=0; j< cities.length; j++){
+            if ((missiles[i].y > cities[j].y) && (cities[j].x < xPlus) && (cities[j].x > xMinus)){
+                /*console.log('City '+ cities[j].name +' hit');*/
+                cities[j].active = false; 
+            }
+        }
+    }
+}
+
+/* Determine if Missile Hit Target Gun */
+function hitGun(killzone){
+    for (var i=0; i< missiles.length; i++){
+        var xPlus = missiles[i].x + killzone;
+        var xMinus = missiles[i].x - killzone;
+        for (var j=0; j< guns.length; j++){
+            if ((missiles[i].y > guns[j].y) && (guns[j].x < xPlus) && (guns[j].x > xMinus)){
+                /*console.log('Gun '+ guns[j].name +' hit');*/
+                guns[j].active = false; 
             }
         }
     }
@@ -479,13 +491,33 @@ function updateMissiles(){
     }
 }
 
+function cityNum(){
+    for (var i = 0; i < cities.length; i++){
+        if (cities[i].active == false){
+            cities.splice(i,1);
+        }
+    }
+    numCities = cities.length;
+    $('#cityI').text('Cities: '+ numCities);
+}
+
+function gunNum(){
+    for (var i = 0; i < guns.length; i++){
+        if (guns[i].active == false){
+            guns.splice(i,1);
+        }
+    }
+    numGuns = guns.length;
+}
+
 /* Update Everything  */
 function update(){
     updateAntiMissiles();
     updateMissiles();
-    intercept(antiMissiles,missiles,60);
-    intercept(missiles,cities,0);
-    intercept(missiles,guns,0);
+    intercept(antiMissiles,missiles,80);
+    hitCity(20);
+    hitGun(20);
+    cityNum();
 }
 
 /* Draw Everything  */
@@ -495,6 +527,9 @@ function draw(){
     }
     for (var j = 0; j < missiles.length; j++){
         missiles[j].drawMissile();
+    }
+    for (var k = 0; k < numGuns; k++){
+        guns[k].drawGun();
     }
     return;
 }
