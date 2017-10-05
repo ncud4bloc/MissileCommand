@@ -1,4 +1,5 @@
 var level = 1;          // current game level
+var gScore = 0;         // initial game score
 var FPS = 70;           // frame rate per second to control game speed
 var alphaGun;           // initialize alphaGun variable in global scope
 var bravoGun;           // initialize bravoGun variable in global scope
@@ -324,8 +325,8 @@ var MissileGen = function(mName,mRadius,mActive,mColor){
 
 /* Create a Wave of Attack Missiles */
 function offensiveFireControl(){
-     var misslesPerIter = 2;
-     /*var misslesPerIter = Math.floor(Math.random()*5 + 1);*/
+     /*var misslesPerIter = 2;*/
+     var misslesPerIter = Math.floor(Math.random()*5 + 1);
         for (var i = 0; i < misslesPerIter; i++){
             var missEL = new MissileGen('missEL'+i,0.25,true,"#8d128d");
             missEL.pickTarget();
@@ -379,11 +380,18 @@ function intercept(weaponAR,targetAR,killzone){
         var yPlus = weaponAR[i].y + killzone;
         var yMinus = weaponAR[i].y - killzone;
         for (var j=0; j< targetAR.length; j++){
-            if((weaponAR[i].active == true) && (targetAR[j].active == true) && (targetAR[j].x < xPlus) && (targetAR[j].x > xMinus) && (targetAR[j].y < yPlus) && (targetAR[j].y > xMinus)){
+            if((weaponAR[i].active == true) && (targetAR[j].active == true) && (targetAR[j].x < xPlus) && (targetAR[j].x > xMinus) && (targetAR[j].y < yPlus) && (targetAR[j].y > xMinus) && (weaponAR[i].y <= myClicks[i][1])){
                 var detonate = distance(weaponAR[i].x,weaponAR[i].y,targetAR[j].x,targetAR[j].y);
-                console.log('Prev dist: '+detonatePrev+' , Current dist: '+detonate);
+                /*console.log('Prev dist: '+detonatePrev+' , Current dist: '+detonate);*/
                 if (detonate > detonatePrev){
                     console.log(weaponAR[i].name + ' scored a hit!');
+                    
+                    if (antiMissiles[i].y < 200){
+                        gScore += 100;
+                    } else {
+                        gScore += 50;
+                    }
+                    showScore();
                     
                     if (antiMissiles[i].explodeR < 25){
                         antiMissileExplode(antiMissiles[i].x,antiMissiles[i].y,i,"#f00");    
@@ -420,6 +428,8 @@ function hitCity(killzone){
         for (var j=0; j< cities.length; j++){
             if ((missiles[i].y > cities[j].y) && (cities[j].x < xPlus) && (cities[j].x > xMinus)){
                 /*console.log('City '+ cities[j].name +' hit');*/
+                gScore -= 20;
+                showScore();
                 cities[j].active = false; 
             }
         }
@@ -433,11 +443,14 @@ function hitGun(killzone){
         var xMinus = missiles[i].x - killzone;
         for (var j=0; j< guns.length; j++){
             if ((missiles[i].y > guns[j].y) && (guns[j].x < xPlus) && (guns[j].x > xMinus)){
-                /*console.log('Gun '+ guns[j].name +' hit');*/
+                /*console.log('Gun '+ guns[j].name +' hit');
+                gScore -= 10;
+                showScore();*/
                 guns[j].active = false; 
             }
         }
     }
+    gunNum();
 }
 
 /* Update the Anti-Missile Positions and Status */
@@ -505,9 +518,15 @@ function gunNum(){
     for (var i = 0; i < guns.length; i++){
         if (guns[i].active == false){
             guns.splice(i,1);
+            gScore -= 10;
+            showScore();
         }
     }
     numGuns = guns.length;
+}
+
+function showScore(){
+    $('#scoreI').text('Score: ' + gScore);
 }
 
 /* Update Everything  */
@@ -574,6 +593,7 @@ $(function(){
     $('#gStart').on('click',function(){
         
         offensiveFireControl();
+        $('#levelI').text('Level: ' + level);
         
         $('#canvas').on('click',function(){
             mouseXY();
