@@ -33,32 +33,3 @@ $('#gStart').on('click',function(){
       var missiles = [];
       level +=1;
   }  
-    
-
-
-
-
-
-
-
-
-
-        
-       for (var levelC = 1; levelC < 6; levelC++){
-            if (levelC == 1) {
-                setInterval(function() {
-                    update();
-                    draw();
-                    /*upLevel();*/
-                }, 1000/FPS);  
-            } else {
-                $('#levelI').text('Level: ' + level);
-                
-                setInterval(function() {
-                    offensiveFireControl();
-                    
-                }, 10000);
-            }
-        }
-              
-     

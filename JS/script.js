@@ -1,7 +1,7 @@
 var level = 1;          // current game level
 var playLevel = true;   // flag to turn off at the conclusion of each level
 var gScore = 0;         // initial game score
-var FPS = 10;           // frame rate per second to control game speed
+var FPS = 50;           // frame rate per second to control game speed
 var alphaGun;           // initialize alphaGun variable in global scope
 var bravoGun;           // initialize bravoGun variable in global scope
 var charlieGun;         // initialize charlieGun variable in global scope
@@ -604,7 +604,7 @@ function continuePlay(){
     setInterval(function() {
         /*clearInterval(gRate);*/
         playMC();
-    }, 10000);
+    }, 20000);
 }
 
 
