@@ -621,21 +621,24 @@ $(function(){
             count++;
         });
         
-       for (level = 1; level < 6; level++){
-            if (level == 1) {
+       for (var levelC = 1; levelC < 6; levelC++){
+            if (levelC == 1) {
                 setInterval(function() {
                     update();
                     draw();
                     /*upLevel();*/
                 }, 1000/FPS);  
             } else {
+                level += 1;
+                $('#levelI').text('Level: ' + level);
+                var antiMissiles = []; 
+                var missiles = [];
                 setInterval(function() {
                     offensiveFireControl();
                     setInterval(function() {
                         update();
                         draw();
                     }, 1000/(FPS/70));
-                    $('#levelI').text('Level: ' + level);
                 }, 10000);
             }
         }
