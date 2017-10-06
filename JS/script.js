@@ -1,4 +1,5 @@
 var level = 1;          // current game level
+var playLevel = true;   // flag to turn off at the conclusion of each level
 var gScore = 0;         // initial game score
 var FPS = 70;           // frame rate per second to control game speed
 var alphaGun;           // initialize alphaGun variable in global scope
@@ -23,6 +24,7 @@ var numCities = 6;      // initial number of cities at game start
 var numGuns = 3;        // initial number of guns at game start
 var cities = [];        // array of all city objects
 var guns = [];          // array of all city defensive artilliery objects
+var allTargets = [];    // array of all targets for attacking missiles
 var firingGun;          // current gun that is active and firing
 var explosionXY = [];   // array consisting of a single explosion X & Y
 var explosionsAtk = []; // array of all the attackers successful hits
@@ -71,6 +73,7 @@ var CityGen = function(cName,cPosX,cPosY,cWidth,cHeight,cActive){
     
     this.addCity = function(){
         cities.push(this);
+        allTargets.push(this);
     }
     
     this.drawCity = function(){
@@ -120,6 +123,7 @@ var GunGen = function(gName,gPosX,gPosY,gRadius,gActive){
     
     this.addGun = function(){
         guns.push(this);
+        allTargets.push(this);
     }
     
     this.drawGun = function(){
@@ -284,40 +288,40 @@ var MissileGen = function(mName,mRadius,mActive,mColor){
         var missleTarget = Math.floor(Math.random()*9 + 1);
             switch(missleTarget) {
                 case 1:
-                    this.tX = cities[0].x + 10;
-                    this.tY = cities[0].y + 15;
+                    this.tX = allTargets[0].x + 10;
+                    this.tY = allTargets[0].y + 15;
                     break;
                 case 2:
-                    this.tX = cities[1].x + 10;
-                    this.tY = cities[1].y + 15;
+                    this.tX = allTargets[1].x + 10;
+                    this.tY = allTargets[1].y + 15;
                     break;
                 case 3:
-                    this.tX = cities[2].x + 10;
-                    this.tY = cities[2].y + 15;
+                    this.tX = allTargets[2].x + 10;
+                    this.tY = allTargets[2].y + 15;
                     break;
                 case 4:
-                    this.tX = cities[3].x + 10;
-                    this.tY = cities[3].y + 15;
+                    this.tX = allTargets[3].x + 10;
+                    this.tY = allTargets[3].y + 15;
                     break;
                 case 5:
-                    this.tX = cities[4].x + 10;
-                    this.tY = cities[4].y + 15;
+                    this.tX = allTargets[4].x + 10;
+                    this.tY = allTargets[4].y + 15;
                     break;
                 case 6:
-                    this.tX = cities[5].x + 10;
-                    this.tY = cities[5].y + 15;
+                    this.tX = allTargets[5].x + 10;
+                    this.tY = allTargets[5].y + 15;
                     break;
                 case 7:
-                    this.tX = guns[0].x;
-                    this.tY = guns[0].y;
+                    this.tX = allTargets[6].x;
+                    this.tY = allTargets[6].y;
                     break;
                 case 8:
-                    this.tX = guns[1].x;
-                    this.tY = guns[1].y;
+                    this.tX = allTargets[7].x;
+                    this.tY = allTargets[7].y;
                     break;
                 case 9:
-                    this.tX = guns[2].x;
-                    this.tY = guns[2].y;
+                    this.tX = allTargets[8].x;
+                    this.tY = allTargets[8].y;
             }
     } 
     
@@ -326,6 +330,7 @@ var MissileGen = function(mName,mRadius,mActive,mColor){
 /* Create a Wave of Attack Missiles */
 function offensiveFireControl(){
      /*var misslesPerIter = 2;*/
+     missiles =[];
      var misslesPerIter = Math.floor(Math.random()*5 + 1);
         for (var i = 0; i < misslesPerIter; i++){
             var missEL = new MissileGen('missEL'+i,0.25,true,"#8d128d");
@@ -385,6 +390,7 @@ function intercept(weaponAR,targetAR,killzone){
                 /*console.log('Prev dist: '+detonatePrev+' , Current dist: '+detonate);*/
                 if (detonate > detonatePrev){
                     console.log(weaponAR[i].name + ' scored a hit!');
+                    missiles[i].detonated = true;
                     
                     if (antiMissiles[i].y < 200){
                         gScore += 100;
@@ -431,6 +437,7 @@ function hitCity(killzone){
                 gScore -= 20;
                 showScore();
                 cities[j].active = false; 
+                missiles[i].detonated = true;
             }
         }
     }
@@ -446,7 +453,8 @@ function hitGun(killzone){
                 /*console.log('Gun '+ guns[j].name +' hit');
                 gScore -= 10;
                 showScore();*/
-                guns[j].active = false; 
+                guns[j].active = false;
+                missiles[i].detonated = true;
             }
         }
     }
@@ -529,6 +537,18 @@ function showScore(){
     $('#scoreI').text('Score: ' + gScore);
 }
 
+function upLevel(){
+    var levelOver = 0;
+    for (var i = 0; i < missiles.length; i++){
+        if (missiles[i].detonated == false){
+            levelOver += 1;
+        } 
+    }
+    if (levelOver == 0){
+        level += 1;
+    }
+}
+
 /* Update Everything  */
 function update(){
     updateAntiMissiles();
@@ -601,13 +621,24 @@ $(function(){
             count++;
         });
         
-        setInterval(function() {
-            update();
-            draw();
-        }, 1000/FPS);
-        
-    }); 
-    
-    
-    
+       for (level = 1; level < 6; level++){
+            if (level == 1) {
+                setInterval(function() {
+                    update();
+                    draw();
+                    /*upLevel();*/
+                }, 1000/FPS);  
+            } else {
+                setInterval(function() {
+                    offensiveFireControl();
+                    setInterval(function() {
+                        update();
+                        draw();
+                    }, 1000/(FPS/70));
+                    $('#levelI').text('Level: ' + level);
+                }, 10000);
+            }
+        }
+              
+    });    
 });
