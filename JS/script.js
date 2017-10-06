@@ -378,18 +378,18 @@ var missilePathErase = function(x1,y1,x2,y2,t){
 };
 
 /* Determine if Anti-Missile Intercepted Attack Missile */
-function intercept(weaponAR,targetAR,killzone){
-    for (var i=0; i< weaponAR.length; i++){
-        var xPlus = weaponAR[i].x + killzone;
-        var xMinus = weaponAR[i].x - killzone;
-        var yPlus = weaponAR[i].y + killzone;
-        var yMinus = weaponAR[i].y - killzone;
-        for (var j=0; j< targetAR.length; j++){
-            if((weaponAR[i].active == true) && (targetAR[j].active == true) && (targetAR[j].x < xPlus) && (targetAR[j].x > xMinus) && (targetAR[j].y < yPlus) && (targetAR[j].y > xMinus) && (weaponAR[i].y <= myClicks[i][1])){
-                var detonate = distance(weaponAR[i].x,weaponAR[i].y,targetAR[j].x,targetAR[j].y);
+function intercept(killzone){
+    for (var i=0; i< antiMissiles.length; i++){
+        var xPlus = antiMissiles[i].x + killzone;
+        var xMinus = antiMissiles[i].x - killzone;
+        var yPlus = antiMissiles[i].y + killzone;
+        var yMinus = antiMissiles[i].y - killzone;
+        for (var j=0; j< missiles.length; j++){
+            if((antiMissiles[i].active == true) && (missiles[j].active == true) && (missiles[j].x < xPlus) && (missiles[j].x > xMinus) && (missiles[j].y < yPlus) && (missiles[j].y > xMinus) && (antiMissiles[i].y <= myClicks[i][1])){
+                var detonate = distance(antiMissiles[i].x,antiMissiles[i].y,missiles[j].x,missiles[j].y);
                 /*console.log('Prev dist: '+detonatePrev+' , Current dist: '+detonate);*/
                 if (detonate > detonatePrev){
-                    console.log(weaponAR[i].name + ' scored a hit!');
+                    console.log(antiMissiles[i].name + ' scored a hit!');
                     missiles[i].detonated = true;
                     
                     if (antiMissiles[i].y < 200){
@@ -407,16 +407,14 @@ function intercept(weaponAR,targetAR,killzone){
                         setTimeout(antiMissilePathErase(antiMissiles[i].xInit,antiMissiles[i].yInit,antiMissiles[i].x,antiMissiles[i].y,2 * antiMissiles[i].radius), 5000);
                         antiMissiles[i].radius = 0;
                     }
-                   
                     missiles[j].explodeMR = 25;
                     if ((missiles[j].explodeMR == 25) && (missiles[j].explodeEraseMR > 0)){
                         missileExplodeErase(missiles[j].x,missiles[j].y,j,"#66cbf0");
                         setTimeout(missilePathErase(missiles[j].xInit,missiles[j].yInit,missiles[j].x,missiles[j].y,2 * missiles[j].radius), 5000);
                         /*missiles[j].radius = 0;*/
                     } 
-                    
-                    weaponAR[i].active = false;
-                    targetAR[j].active = false;
+                    antiMissiles[i].active = false;
+                    missiles[j].active = false;
                 } else {
                     detonatePrev = detonate;
                 }
@@ -553,7 +551,7 @@ function upLevel(){
 function update(){
     updateAntiMissiles();
     updateMissiles();
-    intercept(antiMissiles,missiles,80);
+    intercept(30);
     hitCity(20);
     hitGun(20);
     cityNum();
