@@ -1,7 +1,7 @@
 var level = 1;          // current game level
 var playLevel = true;   // flag to turn off at the conclusion of each level
 var gScore = 0;         // initial game score
-var FPS = 10;           // frame rate per second to control game speed
+var FPS = 70;           // frame rate per second to control game speed
 var alphaGun;           // initialize alphaGun variable in global scope
 var bravoGun;           // initialize bravoGun variable in global scope
 var charlieGun;         // initialize charlieGun variable in global scope
@@ -30,7 +30,6 @@ var explosionXY = [];   // array consisting of a single explosion X & Y
 var explosionsAtk = []; // array of all the attackers successful hits
 var explosionsDef = []; // array of all the defenders successful missile shootdowns
 var detonatePrev = 900; // initial detonation distance used to calcuate time of explosion
-var gRate;
 
 var canvas = document.getElementById('canvas');
 var c = canvas.getContext('2d');
@@ -330,6 +329,7 @@ var MissileGen = function(mName,mRadius,mActive,mColor){
 
 /* Create a Wave of Attack Missiles */
 function offensiveFireControl(){
+     /*var misslesPerIter = 2;*/
      missiles =[];
      var misslesPerIter = Math.floor(Math.random()*5 + 1);
         for (var i = 0; i < misslesPerIter; i++){
@@ -573,40 +573,6 @@ function draw(){
     return;
 }
 
-/* Game Pace */
-gRate = setInterval(function() {update();draw();}, 1000/FPS);
-
-/* Play the Game */
-function playMC(){
-      $('#levelI').text('Level: ' + level);
-      offensiveFireControl();
-        console.log('Level ' + level + ' missiles generated and targets selected');
-      
-      $('#canvas').on('click',function(){
-        mouseXY();
-        defensiveFireControl(mouseX,mouseY);
-          console.log('Level ' + level + ' firing gun determined and anti-missile fired');
-        count++;
-      });
-      
-      setInterval(function() {
-        update();
-        draw();
-      }, 1000/FPS);
-      /*gRate;*/
-      
-      var antiMissiles = []; 
-      var missiles = [];
-      level +=1;
-  }
-
-function continuePlay(){
-    setInterval(function() {
-        /*clearInterval(gRate);*/
-        playMC();
-    }, 10000);
-}
-
 
 
 /* ---------------  Function Calls  --------------- */
@@ -646,9 +612,36 @@ $(function(){
         
     $('#gStart').on('click',function(){
         
+        offensiveFireControl();
         $('#levelI').text('Level: ' + level);
-        playMC();
-        continuePlay();
         
-    });   
+        $('#canvas').on('click',function(){
+            mouseXY();
+            defensiveFireControl(mouseX,mouseY);
+            count++;
+        });
+        
+       for (var levelC = 1; levelC < 6; levelC++){
+            if (levelC == 1) {
+                setInterval(function() {
+                    update();
+                    draw();
+                    /*upLevel();*/
+                }, 1000/FPS);  
+            } else {
+                level += 1;
+                $('#levelI').text('Level: ' + level);
+                var antiMissiles = []; 
+                var missiles = [];
+                setInterval(function() {
+                    offensiveFireControl();
+                    setInterval(function() {
+                        update();
+                        draw();
+                    }, 1000/(FPS/70));
+                }, 10000);
+            }
+        }
+              
+    });    
 });
