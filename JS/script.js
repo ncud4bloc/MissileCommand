@@ -1,5 +1,4 @@
 var level = 1;          // current game level
-var playLevel = true;   // flag to turn off at the conclusion of each level
 var gScore = 0;         // initial game score
 var FPS = 50;           // frame rate per second to control game speed
 var alphaGun;           // initialize alphaGun variable in global scope
@@ -30,7 +29,7 @@ var explosionXY = [];   // array consisting of a single explosion X & Y
 var explosionsAtk = []; // array of all the attackers successful hits
 var explosionsDef = []; // array of all the defenders successful missile shootdowns
 var detonatePrev = 900; // initial detonation distance used to calcuate time of explosion
-var gRate;
+var myIncrement;
 
 var canvas = document.getElementById('canvas');
 var c = canvas.getContext('2d');
@@ -58,7 +57,6 @@ var GroundGen = function(){
         c.lineTo(i*260,530);
         c.fill();
         c.closePath();
-        /*c.fill();*/
     }
 };
 
@@ -330,8 +328,7 @@ var MissileGen = function(mName,mRadius,mActive,mColor){
 /* Create a Wave of Attack Missiles */
 function offensiveFireControl(){
      missiles =[];
-     var misslesPerIter = 1;
-     /*var misslesPerIter = Math.floor(Math.random()*5 + 1);*/
+     var misslesPerIter = Math.floor(Math.random()*5 + 1);
         for (var i = 0; i < misslesPerIter; i++){
             var missEL = new MissileGen('missEL'+i,0.25,true,"#8d128d");
             missEL.pickTarget();
@@ -390,7 +387,6 @@ function intercept(killzone){
                 /*console.log('Prev dist: '+detonatePrev+' , Current dist: '+detonate);*/
                 if (detonate > detonatePrev){
                     console.log(antiMissiles[i].name + ' scored a hit!');
-                    /*missiles[i].detonated = true;*/
                     
                     if (antiMissiles[i].y < 200){
                         gScore += 100;
@@ -435,7 +431,6 @@ function hitCity(killzone){
                 gScore -= 20;
                 showScore();
                 cities[j].active = false; 
-                /*missiles[i].detonated = true;*/
             }
         }
     }
@@ -448,11 +443,7 @@ function hitGun(killzone){
         var xMinus = missiles[i].x - killzone;
         for (var j=0; j< guns.length; j++){
             if ((missiles[i].y > guns[j].y) && (guns[j].x < xPlus) && (guns[j].x > xMinus)){
-                /*console.log('Gun '+ guns[j].name +' hit');
-                gScore -= 10;
-                showScore();*/
                 guns[j].active = false;
-                /*missiles[i].detonated = true;*/
             }
         }
     }
@@ -535,23 +526,11 @@ function showScore(){
     $('#scoreI').text('Score: ' + gScore);
 }
 
-/*function upLevel(){
-    var levelOver = 0;
-    for (var i = 0; i < missiles.length; i++){
-        if (missiles[i].detonated == false){
-            levelOver += 1;
-        } 
-    }
-    if (levelOver == 0){
-        level += 1;
-    }
-}*/
-
 /* Update Everything  */
 function update(){
     updateAntiMissiles();
     updateMissiles();
-    intercept(30);
+    intercept(15);
     hitCity(20);
     hitGun(20);
     cityNum();
@@ -571,10 +550,17 @@ function draw(){
     return;
 }
 
-/* Game Pace */
-gRate = setInterval(function() {update();draw();}, 1000/FPS);
-
 /* Play the Game */
+
+function eachStep(){
+    update();
+    draw();
+}
+
+function stopStep(){
+    clearInterval(myIncrement);
+}
+
 function playMC(){
       $('#levelI').text('Level: ' + level);
       offensiveFireControl();
@@ -587,28 +573,26 @@ function playMC(){
         count++;
       });
       
-      setInterval(function() {
+      /*setInterval(function() {
         update();
         draw();
-      }, 1000/FPS);
-      /*gRate;*/
+      }, 1000/FPS);*/
+    
+      myIncrement = setInterval(function(){eachStep()}, 1000/FPS);
+      /*myIncrement();*/
       
-     /* var antiMissiles = []; 
-      var missiles = [];
-      var myClicks = [];
-      var count = 0;*/
       level +=1;
   }
 
 function continuePlay(){
     setInterval(function() {
-        /*clearInterval(gRate);*/
         var antiMissiles = []; 
         var missiles = [];
         var myClicks = [];
         var count = 0;
+        stopStep();
         playMC();
-    }, 20000);
+    }, 15000);
 }
 
 
