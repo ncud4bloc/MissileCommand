@@ -29,7 +29,7 @@ var explosionXY = [];   // array consisting of a single explosion X & Y
 var explosionsAtk = []; // array of all the attackers successful hits
 var explosionsDef = []; // array of all the defenders successful missile shootdowns
 var detonatePrev = 900; // initial detonation distance used to calcuate time of explosion
-var myIncrement;
+var myIncrement;        // variable for controlling iterative graphic updates
 
 var canvas = document.getElementById('canvas');
 var c = canvas.getContext('2d');
@@ -551,7 +551,6 @@ function draw(){
 }
 
 /* Play the Game */
-
 function eachStep(){
     update();
     draw();
@@ -564,23 +563,16 @@ function stopStep(){
 function playMC(){
       $('#levelI').text('Level: ' + level);
       offensiveFireControl();
-        console.log('Level ' + level + ' missiles generated and targets selected');
+        /*console.log('Level ' + level + ' missiles generated and targets selected');*/
       
       $('#canvas').on('click',function(){
         mouseXY();
         defensiveFireControl(mouseX,mouseY);
-          console.log('Level ' + level + ' firing gun determined and anti-missile fired');
+          /*console.log('Level ' + level + ' firing gun determined and anti-missile fired');*/
         count++;
       });
       
-      /*setInterval(function() {
-        update();
-        draw();
-      }, 1000/FPS);*/
-    
       myIncrement = setInterval(function(){eachStep()}, 1000/FPS);
-      /*myIncrement();*/
-      
       level +=1;
   }
 
