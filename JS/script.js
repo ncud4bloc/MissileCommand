@@ -167,7 +167,7 @@ function defensiveFireControl(targetX,targetY){
     var alphaD = distance(alphaGun.x,alphaGun.y,targetX,targetY);
     var bravoD = distance(bravoGun.x,bravoGun.y,targetX,targetY);
     var charlieD = distance(charlieGun.x,charlieGun.y,targetX,targetY);
-    if ((alphaD < bravoD) && (alphaD < charlieD) && (targetY < 400) && (alphaGun.ammo > 0)){
+    if ((guns[0].active == true) && (alphaD < bravoD) && (alphaD < charlieD) && (targetY < 400) && (alphaGun.ammo > 0)){
         var initX = alphaGun.x;
         var initY = alphaGun.y;
         firingGun = 'alphaGun';
@@ -177,7 +177,7 @@ function defensiveFireControl(targetX,targetY){
         charlieGun.firing = 'standby';
         azimuth = (targetX - alphaGun.x)/alphaD;
         /*console.log(firingGun +' will fire');*/
-    } else if ((bravoD <= alphaD) && (bravoD <= charlieD) && (targetY < 400) && (bravoGun.ammo > 0)){
+    } else if ((guns[1].active == true) && (bravoD <= alphaD) && (bravoD <= charlieD) && (targetY < 400) && (bravoGun.ammo > 0)){
         var initX = bravoGun.x;
         var initY = bravoGun.y;
         firingGun = 'bravoGun';
@@ -187,7 +187,7 @@ function defensiveFireControl(targetX,targetY){
         charlieGun.firing = 'standby';
         azimuth = (targetX - bravoGun.x)/bravoD;
         /*console.log(firingGun +' will fire');*/
-    } else if ((charlieD < bravoD) && (charlieD < alphaD) && (targetY < 400) && (charlieGun.ammo > 0)){
+    } else if ((guns[2].active == true) && (charlieD < bravoD) && (charlieD < alphaD) && (targetY < 400) && (charlieGun.ammo > 0)){
         var initX = charlieGun.x;
         var initY = charlieGun.y;
         firingGun = 'charlieGun';
@@ -441,11 +441,13 @@ function hitGun(killzone){
         var xMinus = missiles[i].x - killzone;
         for (var j=0; j< guns.length; j++){
             if ((missiles[i].y > guns[j].y) && (guns[j].x < xPlus) && (guns[j].x > xMinus)){
+                /*gScore -= 10;
+                showScore();*/
                 guns[j].active = false;
             }
         }
     }
-    gunNum();
+    /*gunNum();*/
 }
 
 /* Update the Anti-Missile Positions and Status */
@@ -510,20 +512,32 @@ function cityNum(){
 }
 
 function gunNum(){
-    for (var i = 0; i < guns.length; i++){
+    /*for (var i = 0; i < guns.length; i++){
         if (guns[i].active == false){
             guns.splice(i,1);
             gScore -= 10;
             showScore();
         }
+    }*/
+    
+    for (var i = 0; i < guns.length; i++){
+        if (guns[i].active == false){
+            numGuns -= 1;
+            gScore -= 10;
+            showScore();
+        }
     }
-    numGuns = guns.length;
+    
+    /*numGuns = guns.length;*/
 }
 
 function reArm(){
     for (var i = 0; i < guns.length; i++){
         if ((level % 5 == 0) && (guns[i].active == true)){
             guns[i].ammo = 20;
+            $('#alphaI').text('Alpha: '+ alphaGun.ammo);
+            $('#bravoI').text('Bravo: '+ bravoGun.ammo);
+            $('#charlieI').text('Charlie: '+ charlieGun.ammo);
             console.log('Gun ' + guns[i].name + ' re-armed');
         }
     }
@@ -572,8 +586,10 @@ function draw(){
     for (var j = 0; j < missiles.length; j++){
         missiles[j].drawMissile();
     }
-    for (var k = 0; k < numGuns; k++){
-        guns[k].drawGun();
+    for (var k = 0; k < 3; k++){
+        if (guns[k].active == true){
+            guns[k].drawGun();
+        } 
     }
     return;
 }
@@ -585,6 +601,7 @@ function eachStep(){
 }
 
 function eachLevel(){
+    gunNum();
     victoryConditions();
     var antiMissiles = []; 
     var missiles = [];
