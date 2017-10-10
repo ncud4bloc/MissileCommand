@@ -537,16 +537,14 @@ function victoryConditions(){
     if (numCities < 1){
         endNote = 'Game ends in defeat...all cities destroyed \n \n Reload for new game';
         endGame();
-        stopStep(myLevel);
     } else {
-        console.log('Continuing to level ' + level);
+        console.log('Continuing to level ' + level +1);
     }
     
     if ((numCities > 0) && ((level > 15) || (gScore > 5000))){
         console.log('Game won in level ' + level);
         endNote = 'Game Victory! Level: ' + level + ' Score: ' + gScore + '\n \n Reload for new game';
         endGame();
-        stopStep(myLevel);
     }
 }
 
@@ -585,7 +583,6 @@ function eachStep(){
 }
 
 function eachLevel(){
-    victoryConditions();
     var antiMissiles = []; 
     var missiles = [];
     var myClicks = [];
@@ -604,12 +601,12 @@ function playMC(){
       offensiveFireControl();
         /*console.log('Level ' + level + ' missiles generated and targets selected');*/
       
-      /*$('#canvas').on('click',function(){
+      $('#canvas').on('click',function(){
         mouseXY();
-        defensiveFireControl(mouseX,mouseY);*/
+        defensiveFireControl(mouseX,mouseY);
           /*console.log('Level ' + level + ' firing gun determined and anti-missile fired');*/
-        /*count++;
-      });*/
+        count++;
+      });
       
       myIncrement = setInterval(function(){eachStep()}, 1000/FPS);
       level +=1;
@@ -665,13 +662,6 @@ $(function(){
             charlieGun.drawGun();
         
     $('#gStart').on('click',function(){
-        
-        $('#canvas').on('click',function(){
-        mouseXY();
-        defensiveFireControl(mouseX,mouseY);
-          /*console.log('Level ' + level + ' firing gun determined and anti-missile fired');*/
-        count++;
-      });
         
         $('#levelI').text('Level: ' + level);
         playMC();

@@ -30,8 +30,6 @@ var explosionsAtk = []; // array of all the attackers successful hits
 var explosionsDef = []; // array of all the defenders successful missile shootdowns
 var detonatePrev = 900; // initial detonation distance used to calcuate time of explosion
 var myIncrement;        // variable for controlling iterative graphic updates
-var myLevel;            // variable for controlling iterative levels
-var endNote;            // end of game message
 
 var canvas = document.getElementById('canvas');
 var c = canvas.getContext('2d');
@@ -520,38 +518,8 @@ function gunNum(){
     numGuns = guns.length;
 }
 
-function reArm(){
-    for (var i = 0; i < guns.length; i++){
-        if ((level % 5 == 0) && (guns[i].active == true)){
-            guns[i].ammo = 20;
-            console.log('Gun ' + guns[i].name + ' re-armed');
-        }
-    }
-}
-
 function showScore(){
     $('#scoreI').text('Score: ' + gScore);
-}
-
-function victoryConditions(){
-    if (numCities < 1){
-        endNote = 'Game ends in defeat...all cities destroyed \n \n Reload for new game';
-        endGame();
-        stopStep(myLevel);
-    } else {
-        console.log('Continuing to level ' + level);
-    }
-    
-    if ((numCities > 0) && ((level > 15) || (gScore > 5000))){
-        console.log('Game won in level ' + level);
-        endNote = 'Game Victory! Level: ' + level + ' Score: ' + gScore + '\n \n Reload for new game';
-        endGame();
-        stopStep(myLevel);
-    }
-}
-
-function endGame(){
-    alert(endNote);
 }
 
 /* Update Everything  */
@@ -584,19 +552,8 @@ function eachStep(){
     draw();
 }
 
-function eachLevel(){
-    victoryConditions();
-    var antiMissiles = []; 
-    var missiles = [];
-    var myClicks = [];
-    var count = 0;
-    stopStep(myIncrement);
-    playMC();
-    reArm();
-}
-
-function stopStep(incID){
-    clearInterval(incID);
+function stopStep(){
+    clearInterval(myIncrement);
 }
 
 function playMC(){
@@ -604,27 +561,26 @@ function playMC(){
       offensiveFireControl();
         /*console.log('Level ' + level + ' missiles generated and targets selected');*/
       
-      /*$('#canvas').on('click',function(){
+      $('#canvas').on('click',function(){
         mouseXY();
-        defensiveFireControl(mouseX,mouseY);*/
+        defensiveFireControl(mouseX,mouseY);
           /*console.log('Level ' + level + ' firing gun determined and anti-missile fired');*/
-        /*count++;
-      });*/
+        count++;
+      });
       
       myIncrement = setInterval(function(){eachStep()}, 1000/FPS);
       level +=1;
   }
 
 function continuePlay(){
-    myLevel = setInterval(function(){eachLevel()}, 20000);
-    /*setInterval(function() {
+    setInterval(function() {
         var antiMissiles = []; 
         var missiles = [];
         var myClicks = [];
         var count = 0;
-        stopStep(myIncrement);
+        stopStep();
         playMC();
-    }, 20000);*/
+    }, 20000);
 }
 
 
@@ -665,13 +621,6 @@ $(function(){
             charlieGun.drawGun();
         
     $('#gStart').on('click',function(){
-        
-        $('#canvas').on('click',function(){
-        mouseXY();
-        defensiveFireControl(mouseX,mouseY);
-          /*console.log('Level ' + level + ' firing gun determined and anti-missile fired');*/
-        count++;
-      });
         
         $('#levelI').text('Level: ' + level);
         playMC();
