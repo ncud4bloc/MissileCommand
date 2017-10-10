@@ -115,6 +115,7 @@ var GunGen = function(gName,gPosX,gPosY,gRadius,gActive){
     this.radius = gRadius;
     this.active = gActive;
     this.firing = 'standby';
+    this.destroyed = false;
     this.ammo = 20;
     
     this.addGun = function(){
@@ -202,6 +203,38 @@ function defensiveFireControl(targetX,targetY){
         bravoGun.firing = 'standby';
         charlieGun.firing = 'standby';
         /*console.log('No guns can fire');*/
+    }
+    
+    if (((guns[0].destroyed == true) || (guns[2].destroyed == true)) && (guns[1].destroyed == false)){
+       var initX = bravoGun.x;
+        var initY = bravoGun.y;
+        firingGun = 'bravoGun';
+        bravoGun.ammo -= 1;
+        alphaGun.firing = 'standby';
+        bravoGun.firing = 'firing';
+        charlieGun.firing = 'standby';
+        azimuth = (targetX - bravoGun.x)/bravoD;
+        /*console.log(firingGun +' will fire');*/
+    } else if (((guns[0].destroyed == true) && (guns[1].destroyed == true)) && (guns[2].destroyed == false)){
+        var initX = charlieGun.x;
+        var initY = charlieGun.y;
+        firingGun = 'charlieGun';
+        charlieGun.ammo -= 1;
+        alphaGun.firing = 'standby';
+        bravoGun.firing = 'standby';
+        charlieGun.firing = 'firing';
+        azimuth = (targetX - charlieGun.x)/charlieD;
+        /*console.log(firingGun +' will fire');*/
+    } else if (((guns[1].destroyed == true) || (guns[2].destroyed == true)) && (guns[0].destroyed == false)){
+        var initX = alphaGun.x;
+        var initY = alphaGun.y;
+        firingGun = 'alphaGun';
+        alphaGun.ammo -= 1;
+        alphaGun.firing = 'firing';
+        bravoGun.firing = 'standby';
+        charlieGun.firing = 'standby';
+        azimuth = (targetX - alphaGun.x)/alphaD;
+        /*console.log(firingGun +' will fire');*/
     }
     
     vectorCalc(azimuth);
@@ -444,10 +477,11 @@ function hitGun(killzone){
                 /*gScore -= 10;
                 showScore();*/
                 guns[j].active = false;
+                guns[j].destroyed = true;
+                guns[j].ammo = 0;
             }
         }
     }
-    /*gunNum();*/
 }
 
 /* Update the Anti-Missile Positions and Status */
@@ -512,14 +546,6 @@ function cityNum(){
 }
 
 function gunNum(){
-    /*for (var i = 0; i < guns.length; i++){
-        if (guns[i].active == false){
-            guns.splice(i,1);
-            gScore -= 10;
-            showScore();
-        }
-    }*/
-    
     for (var i = 0; i < guns.length; i++){
         if (guns[i].active == false){
             numGuns -= 1;
@@ -527,8 +553,6 @@ function gunNum(){
             showScore();
         }
     }
-    
-    /*numGuns = guns.length;*/
 }
 
 function reArm(){
@@ -620,28 +644,12 @@ function playMC(){
       $('#levelI').text('Level: ' + level);
       offensiveFireControl();
         /*console.log('Level ' + level + ' missiles generated and targets selected');*/
-      
-      /*$('#canvas').on('click',function(){
-        mouseXY();
-        defensiveFireControl(mouseX,mouseY);*/
-          /*console.log('Level ' + level + ' firing gun determined and anti-missile fired');*/
-        /*count++;
-      });*/
-      
       myIncrement = setInterval(function(){eachStep()}, 1000/FPS);
       level +=1;
-  }
+}
 
 function continuePlay(){
     myLevel = setInterval(function(){eachLevel()}, 20000);
-    /*setInterval(function() {
-        var antiMissiles = []; 
-        var missiles = [];
-        var myClicks = [];
-        var count = 0;
-        stopStep(myIncrement);
-        playMC();
-    }, 20000);*/
 }
 
 
@@ -688,7 +696,7 @@ $(function(){
         defensiveFireControl(mouseX,mouseY);
           /*console.log('Level ' + level + ' firing gun determined and anti-missile fired');*/
         count++;
-      });
+        });
         
         $('#levelI').text('Level: ' + level);
         playMC();
