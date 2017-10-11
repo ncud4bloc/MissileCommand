@@ -168,6 +168,17 @@ function defensiveFireControl(targetX,targetY){
     var alphaD = distance(alphaGun.x,alphaGun.y,targetX,targetY);
     var bravoD = distance(bravoGun.x,bravoGun.y,targetX,targetY);
     var charlieD = distance(charlieGun.x,charlieGun.y,targetX,targetY);
+    
+    if (guns[0].destroyed == true){
+        alphaD = 5000;
+    }
+    if (guns[1].destroyed == true){
+        bravoD = 4999;
+    }
+    if (guns[2].destroyed == true){
+        charlieD = 5000;
+    }
+    
     if ((guns[0].active == true) && (alphaD < bravoD) && (alphaD < charlieD) && (targetY < 400) && (alphaGun.ammo > 0)){
         var initX = alphaGun.x;
         var initY = alphaGun.y;
@@ -177,7 +188,7 @@ function defensiveFireControl(targetX,targetY){
         bravoGun.firing = 'standby';
         charlieGun.firing = 'standby';
         azimuth = (targetX - alphaGun.x)/alphaD;
-        /*console.log(firingGun +' will fire');*/
+        console.log(firingGun +' will fire');
     } else if ((guns[1].active == true) && (bravoD <= alphaD) && (bravoD <= charlieD) && (targetY < 400) && (bravoGun.ammo > 0)){
         var initX = bravoGun.x;
         var initY = bravoGun.y;
@@ -187,7 +198,7 @@ function defensiveFireControl(targetX,targetY){
         bravoGun.firing = 'firing';
         charlieGun.firing = 'standby';
         azimuth = (targetX - bravoGun.x)/bravoD;
-        /*console.log(firingGun +' will fire');*/
+        console.log(firingGun +' will fire');
     } else if ((guns[2].active == true) && (charlieD < bravoD) && (charlieD < alphaD) && (targetY < 400) && (charlieGun.ammo > 0)){
         var initX = charlieGun.x;
         var initY = charlieGun.y;
@@ -197,44 +208,12 @@ function defensiveFireControl(targetX,targetY){
         bravoGun.firing = 'standby';
         charlieGun.firing = 'firing';
         azimuth = (targetX - charlieGun.x)/charlieD;
-        /*console.log(firingGun +' will fire');*/
+        console.log(firingGun +' will fire');
     } else {
         alphaGun.firing = 'standby';
         bravoGun.firing = 'standby';
         charlieGun.firing = 'standby';
-        /*console.log('No guns can fire');*/
-    }
-    
-    if (((guns[0].destroyed == true) || (guns[2].destroyed == true)) && (guns[1].destroyed == false)){
-       var initX = bravoGun.x;
-        var initY = bravoGun.y;
-        firingGun = 'bravoGun';
-        bravoGun.ammo -= 1;
-        alphaGun.firing = 'standby';
-        bravoGun.firing = 'firing';
-        charlieGun.firing = 'standby';
-        azimuth = (targetX - bravoGun.x)/bravoD;
-        /*console.log(firingGun +' will fire');*/
-    } else if (((guns[0].destroyed == true) && (guns[1].destroyed == true)) && (guns[2].destroyed == false)){
-        var initX = charlieGun.x;
-        var initY = charlieGun.y;
-        firingGun = 'charlieGun';
-        charlieGun.ammo -= 1;
-        alphaGun.firing = 'standby';
-        bravoGun.firing = 'standby';
-        charlieGun.firing = 'firing';
-        azimuth = (targetX - charlieGun.x)/charlieD;
-        /*console.log(firingGun +' will fire');*/
-    } else if (((guns[1].destroyed == true) || (guns[2].destroyed == true)) && (guns[0].destroyed == false)){
-        var initX = alphaGun.x;
-        var initY = alphaGun.y;
-        firingGun = 'alphaGun';
-        alphaGun.ammo -= 1;
-        alphaGun.firing = 'firing';
-        bravoGun.firing = 'standby';
-        charlieGun.firing = 'standby';
-        azimuth = (targetX - alphaGun.x)/alphaD;
-        /*console.log(firingGun +' will fire');*/
+        console.log('No guns can fire');
     }
     
     vectorCalc(azimuth);
@@ -279,7 +258,7 @@ var antiMissilePathErase = function(x1,y1,x2,y2,t){
         c.beginPath();
         c.strokeStyle = "#66cbf0";
         c.lineWidth = t;
-        c.lineCap = "round";
+        /*c.lineCap = "round";*/
         c.moveTo(x1,y1);
         c.lineTo(x2,y2);
         c.stroke();
@@ -398,7 +377,7 @@ var missilePathErase = function(x1,y1,x2,y2,t){
     c.beginPath();
     c.strokeStyle = "#66cbf0";
     c.lineWidth = t;
-    c.lineCap = "round";
+    /*c.lineCap = "round";*/
     c.moveTo(x1,y1);
     c.lineTo(x2,y2);
     c.stroke();
@@ -431,13 +410,13 @@ function intercept(killzone){
                     }
                     if ((antiMissiles[i].explodeR == 25) && (antiMissiles[i].explodeEraseR > 0)){
                         antiMissileExplodeErase(antiMissiles[i].x,antiMissiles[i].y,i,"#66cbf0");
-                        setTimeout(antiMissilePathErase(antiMissiles[i].xInit,antiMissiles[i].yInit,antiMissiles[i].x,antiMissiles[i].y,2 * antiMissiles[i].radius), 5000);
-                        antiMissiles[i].radius = 0;
+                        setTimeout(antiMissilePathErase(antiMissiles[i].xInit,antiMissiles[i].yInit,antiMissiles[i].x,antiMissiles[i].y,4), 5000);
+                        /*antiMissiles[i].radius = 0;*/
                     }
                     missiles[j].explodeMR = 25;
                     if ((missiles[j].explodeMR == 25) && (missiles[j].explodeEraseMR > 0)){
                         missileExplodeErase(missiles[j].x,missiles[j].y,j,"#66cbf0");
-                        setTimeout(missilePathErase(missiles[j].xInit,missiles[j].yInit,missiles[j].x,missiles[j].y,2 * missiles[j].radius), 5000);
+                        setTimeout(missilePathErase(missiles[j].xInit,missiles[j].yInit,missiles[j].x,missiles[j].y,4), 5000);
                         /*missiles[j].radius = 0;*/
                     } 
                     antiMissiles[i].active = false;
@@ -627,11 +606,12 @@ function eachStep(){
 function eachLevel(){
     gunNum();
     victoryConditions();
-    var antiMissiles = []; 
-    var missiles = [];
-    var myClicks = [];
-    var count = 0;
     stopStep(myIncrement);
+    antiMissiles = []; 
+    missiles = [];
+    myClicks = [];
+    gunDeltaAr = [];
+    count = 0;
     playMC();
     reArm();
 }
