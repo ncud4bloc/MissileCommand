@@ -15,7 +15,6 @@ var deltaX;             // anti-missile delta X per time increment
 var deltaY;             // anti-missile delta Y per time increment
 var eachDelta = [];     // array consisting of a single deltaX & deltaY
 var gunDeltaAr = [];    // array of all of the anti-missile deltas (an array of eachDelta arrays)
-var shoot;              // variable for creating each individual firing anti-missile
 var antiMissiles = [];  // array of all fired anti-missiles
 var missiles = [];      // array of all attacking missiles
 var missileDeltaAr = [];// array of all of the missile deltas (an array of eachDelta arrays)
@@ -56,6 +55,17 @@ var GroundGen = function(){
         c.fill();
         c.closePath();
     }
+};
+
+var SkyGen = function(){
+    c.beginPath();
+    c.fillStyle = "#66cbf0";
+    c.moveTo(0,0);
+    c.lineTo(780,0);
+    c.lineTo(780,418);
+    c.lineTo(0,418);
+    c.fill();
+    c.closePath();
 };
 
 /* Create the Cities  */
@@ -143,9 +153,10 @@ var AntiMissileGen = function(bName,bPosX,bPosY,bRadius,bActive,bColor){
     this.yInit = bPosY;
     this.radius = bRadius;
     this.active = bActive;
+    this.color = bColor;
     this.detonated = 'false';
-    this.explodeR = 0;
-    this.explodeEraseR = 27;
+    this.explodeR = 1;
+    this.explodeEraseR = 35;
     
     this.addAntiMissile = function(){
         antiMissiles.push(this);
@@ -179,7 +190,7 @@ function defensiveFireControl(targetX,targetY){
         charlieD = 5001;
     }
     
-    if ((guns[0].active == true) && (alphaD < bravoD) && (alphaD < charlieD) && (targetY < 400) && (alphaGun.ammo > 0)){
+    if ((guns[0].active == true) && (alphaD < bravoD) && (alphaD < charlieD) && (targetY < 387) && (alphaGun.ammo > 0)){
         var initX = alphaGun.x;
         var initY = alphaGun.y;
         firingGun = 'alphaGun';
@@ -189,7 +200,7 @@ function defensiveFireControl(targetX,targetY){
         charlieGun.firing = 'standby';
         azimuth = (targetX - alphaGun.x)/alphaD;
         console.log(firingGun +' will fire');
-    } else if ((guns[1].active == true) && (bravoD <= alphaD) && (bravoD <= charlieD) && (targetY < 400) && (bravoGun.ammo > 0)){
+    } else if ((guns[1].active == true) && (bravoD <= alphaD) && (bravoD <= charlieD) && (targetY < 387) && (bravoGun.ammo > 0)){
         var initX = bravoGun.x;
         var initY = bravoGun.y;
         firingGun = 'bravoGun';
@@ -199,7 +210,7 @@ function defensiveFireControl(targetX,targetY){
         charlieGun.firing = 'standby';
         azimuth = (targetX - bravoGun.x)/bravoD;
         console.log(firingGun +' will fire');
-    } else if ((guns[2].active == true) && (charlieD < bravoD) && (charlieD < alphaD) && (targetY < 400) && (charlieGun.ammo > 0)){
+    } else if ((guns[2].active == true) && (charlieD < bravoD) && (charlieD < alphaD) && (targetY < 387) && (charlieGun.ammo > 0)){
         var initX = charlieGun.x;
         var initY = charlieGun.y;
         firingGun = 'charlieGun';
@@ -220,7 +231,7 @@ function defensiveFireControl(targetX,targetY){
     gunDeltaAr.push(eachDelta);
     eachDelta = [];
 
-    shoot = new AntiMissileGen(firingGun + cStr,initX,initY,1,true,"#f00");
+    var shoot = new AntiMissileGen(firingGun + cStr,initX,initY,1,true,"#f00");
     shoot.addAntiMissile();
     shoot.drawAntiMissile();
     /*console.log('Bullet Array: ' + antiMissiles);
@@ -277,7 +288,7 @@ var MissileGen = function(mName,mRadius,mActive,mColor){
     this.color = mColor;
     this.detonated = 'false';
     this.explodeMR = 1;
-    this.explodeEraseMR = 27;
+    this.explodeEraseMR = 40;
     
     this.addMissile = function(){
         missiles.push(this);
@@ -476,7 +487,7 @@ function updateAntiMissiles(){
                 }
                 if ((antiMissiles[i].explodeR == 25) && (antiMissiles[i].explodeEraseR > 0)){
                     antiMissileExplodeErase(antiMissiles[i].x,antiMissiles[i].y,i,"#66cbf0");
-                    setTimeout(antiMissilePathErase(antiMissiles[i].xInit,antiMissiles[i].yInit,antiMissiles[i].x,antiMissiles[i].y,2 * antiMissiles[i].radius), 5000);
+                    setTimeout(antiMissilePathErase(antiMissiles[i].xInit,antiMissiles[i].yInit,antiMissiles[i].x,antiMissiles[i].y,4), 5000);
                     antiMissiles[i].radius = 0;
                 }
             } else {
@@ -559,7 +570,7 @@ function victoryConditions(){
         console.log('Continuing to level ' + level);
     }
     
-    if ((numCities > 0) && ((level > 15) || (gScore > 5000))){
+    if ((numCities > 0) && ((level > 15) || (gScore > 2500))){
         console.log('Game won in level ' + level);
         endNote = 'Game Victory! Level: ' + level + ' Score: ' + gScore + '\n \n Reload for new game';
         endGame();
@@ -604,6 +615,7 @@ function eachStep(){
 }
 
 function eachLevel(){
+    var newSky = new SkyGen();
     gunNum();
     victoryConditions();
     stopStep(myIncrement);
