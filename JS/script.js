@@ -176,7 +176,7 @@ function defensiveFireControl(targetX,targetY){
         bravoD = 4999;
     }
     if (guns[2].destroyed == true){
-        charlieD = 5000;
+        charlieD = 5001;
     }
     
     if ((guns[0].active == true) && (alphaD < bravoD) && (alphaD < charlieD) && (targetY < 400) && (alphaGun.ammo > 0)){
