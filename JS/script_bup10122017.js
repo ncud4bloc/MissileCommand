@@ -419,42 +419,26 @@ function intercept(killzone){
                     if (antiMissiles[i].explodeR < 25){
                         antiMissileExplode(antiMissiles[i].x,antiMissiles[i].y,i,"#f00");    
                     }
-                    if (antiMissiles[i].explodeEraseR > 0){
-                    /*if ((antiMissiles[i].explodeR == 25) && (antiMissiles[i].explodeEraseR > 0)){*/
+                    if ((antiMissiles[i].explodeR == 25) && (antiMissiles[i].explodeEraseR > 0)){
                         antiMissileExplodeErase(antiMissiles[i].x,antiMissiles[i].y,i,"#66cbf0");
-                        setTimeout(samPE(antiMissiles[i].xInit,antiMissiles[i].yInit,antiMissiles[i].x,antiMissiles[i].y,4), 5000);
-                        antiMissiles[i].radius = 0;
-                        antiMissiles[i].drawAntiMissile();
-                        
+                        setTimeout(antiMissilePathErase(antiMissiles[i].xInit,antiMissiles[i].yInit,antiMissiles[i].x,antiMissiles[i].y,4), 5000);
+                        /*antiMissiles[i].radius = 0;*/
                     }
                     missiles[j].explodeMR = 25;
                     if ((missiles[j].explodeMR == 25) && (missiles[j].explodeEraseMR > 0)){
                         missileExplodeErase(missiles[j].x,missiles[j].y,j,"#66cbf0");
                         setTimeout(missilePathErase(missiles[j].xInit,missiles[j].yInit,missiles[j].x,missiles[j].y,4), 5000);
-                        missiles[j].radius = 0;
-                        missiles[j].drawMissile();
-                       
+                        /*missiles[j].radius = 0;*/
                     } 
                     antiMissiles[i].active = false;
                     missiles[j].active = false;
                 } else {
                     detonatePrev = detonate;
-                }    
+                }
+                    
             }
         }
     }
-}
-
-/* Erase the anti-missile hit path */
-function samPE(x0,y0,xE,yE,w){
-    c.beginPath();
-    c.fillStyle = "#66cbf0";
-    c.lineTo(x0 - w, y0);
-    c.lineTo(xE - w, yE);
-    c.lineTo(xE + w, yE);
-    c.lineTo(x0 + w, y0);
-    c.fill();
-    c.closePath();
 }
 
 /* Determine if Missile Hit Target City */
@@ -581,9 +565,7 @@ function victoryConditions(){
     if (numCities < 1){
         endNote = 'Game ends in defeat...all cities destroyed \n \n Reload for new game';
         endGame();
-        stopStep(myIncrement);
         stopStep(myLevel);
-        var loseSky = new SkyGen();
     } else {
         console.log('Continuing to level ' + level);
     }
@@ -592,9 +574,7 @@ function victoryConditions(){
         console.log('Game won in level ' + level);
         endNote = 'Game Victory! Level: ' + level + ' Score: ' + gScore + '\n \n Reload for new game';
         endGame();
-        stopStep(myIncrement);
         stopStep(myLevel);
-        var winSky = new SkyGen();
     }
 }
 
@@ -632,13 +612,12 @@ function draw(){
 function eachStep(){
     update();
     draw();
-    victoryConditions();
 }
 
 function eachLevel(){
     var newSky = new SkyGen();
     gunNum();
-    /*victoryConditions();*/
+    victoryConditions();
     stopStep(myIncrement);
     antiMissiles = []; 
     missiles = [];
@@ -712,9 +691,6 @@ $(function(){
         });
         
         $('#levelI').text('Level: ' + level);
-        
-        alert('Welcome to Missile Command! To win, you must: \n \n 1. Survive 15 levels, or \n \n 2. Score more than 2500 points \n \n \n - Taking out a missile at long range gives 100 pts \n \n - Shorter range missile hits give 50 pts \n \n - Each destroyed city costs 20 pts \n \n - Each destroyed anti-missile battery costs 10 pts \n \n \n Anti-missile batteries are reloaded at the start of turns 4, 9, and 14 \n \n \n                                               GOOD LUCK!');
-        
         playMC();
         continuePlay();
         
