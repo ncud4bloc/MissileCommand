@@ -588,7 +588,7 @@ function victoryConditions(){
         console.log('Continuing to level ' + level);
     }
     
-    if ((numCities > 0) && ((level > 15) || (gScore > 2500))){
+    if ((numCities > 0) && ((level > 16) || (gScore > 2500))){
         console.log('Game won in level ' + level);
         endNote = 'Game Victory! Level: ' + level + ' Score: ' + gScore + '\n \n Reload for new game';
         endGame();
