@@ -590,7 +590,8 @@ function victoryConditions(){
     
     if ((numCities > 0) && ((level > 16) || (gScore > 5000))){
         console.log('Game won in level ' + level);
-        endNote = 'Game Victory! Level: ' + level -1 + ' Score: ' + gScore + '\n \n Reload for new game';
+        var finalLev = level -1;
+        endNote = 'Game Victory! Level: ' + finalLev + ' Score: ' + gScore + '\n \n Reload for new game';
         endGame();
         stopStep(myIncrement);
         stopStep(myLevel);
