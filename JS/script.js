@@ -349,7 +349,7 @@ var MissileGen = function(mName,mRadius,mActive,mColor){
 /* Create a Wave of Attack Missiles */
 function offensiveFireControl(){
      missiles =[];
-     var misslesPerIter = Math.floor(Math.random()*5 + 1);
+     var misslesPerIter = Math.floor(Math.random()*8 + 1);
         for (var i = 0; i < misslesPerIter; i++){
             var missEL = new MissileGen('missEL'+i,0.25,true,"#8d128d");
             missEL.pickTarget();
@@ -588,9 +588,9 @@ function victoryConditions(){
         console.log('Continuing to level ' + level);
     }
     
-    if ((numCities > 0) && ((level > 16) || (gScore > 2500))){
+    if ((numCities > 0) && ((level > 16) || (gScore > 5000))){
         console.log('Game won in level ' + level);
-        endNote = 'Game Victory! Level: ' + level + ' Score: ' + gScore + '\n \n Reload for new game';
+        endNote = 'Game Victory! Level: ' + level -1 + ' Score: ' + gScore + '\n \n Reload for new game';
         endGame();
         stopStep(myIncrement);
         stopStep(myLevel);
@@ -713,7 +713,7 @@ $(function(){
         
         $('#levelI').text('Level: ' + level);
         
-        alert('Welcome to Missile Command! To win, you must: \n \n 1. Survive 15 levels, or \n \n 2. Score more than 2500 points \n \n \n - Taking out a missile at long range gives 100 pts \n \n - Shorter range missile hits give 50 pts \n \n - Each destroyed city costs 20 pts \n \n - Each destroyed anti-missile battery costs 10 pts \n \n \n Anti-missile batteries are reloaded at the start of turns 4, 9, and 14 \n \n \n                                               GOOD LUCK!');
+        alert('Welcome to Missile Command! To win, you must: \n \n 1. Survive 15 levels, or \n \n 2. Score more than 5000 points \n \n \n - Taking out a missile at long range gives 100 pts \n \n - Shorter range missile hits give 50 pts \n \n - Each destroyed city costs 20 pts \n \n - Each destroyed anti-missile battery costs 10 pts \n \n \n Anti-missile batteries are reloaded at the start of turns 4, 9, and 14 \n \n \n                                               GOOD LUCK!');
         
         playMC();
         continuePlay();
